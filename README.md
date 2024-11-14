@@ -1,6 +1,6 @@
-Medical Image Classification with Convolutional Neural Networks: Two Functional Models (Pretrained and Custom) Trained and Evaluated Individually, as an Ensemble, and Chained
+#Medical Image Classification with Convolutional Neural Networks: Two Functional Models (Pretrained and Custom) Trained and Evaluated Individually, as an Ensemble, and Chained
 
-Executive Summary   
+##Executive Summary   
   
 In this document, we trained a convolutional neural network (CNN) model from scratch to classify CT chest scan images as either cancerous or normal, and then investigated the added benefit of using a pre-trained CNN model on the same dataset by employing transfer learning and model ensembling.
 
@@ -13,7 +13,7 @@ The images to be classified were CT chest images from the dataset found at   htt
 | Ensemble Model | 0.0000 | 0.0000 | 2.0000 | 0.0000 |
 | Chained Model | 0.0000 | 0.0000 | 2.0000 | 0.0000 |
 
-Project Overview
+##Project Overview
 
 The data for this project was obtained at: https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images. Images reveal the presence of one of three chest carcinomas or the presence of healthy cells. The models' tasks are thus to classify each image as an one of the following four outcomes: adenocarcinoma, large cell carcinoma, squamous cell carcinoma, or healthy cells. All images were divided into training (613), testing (315), and validation (72) sets containing four types of images. 
 
