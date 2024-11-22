@@ -54,9 +54,34 @@ The benefits of pre-training include improved performance, better generalization
 
 Pre-trained models often generalize better to new tasks because they start with a solid understanding of basic features and patterns, which can help improve accuracy on the new task. Pre-training can be a powerful technique, especially when data are scarce or where training a model from scratch would be impractical given resource constraints.  
 
+### Compatibility Considerations
+  
+To ensure make our custom CNN and the pre-trained CNN would be compatible with each other for direct ensembling and transfer learning puposes, we took the following precautions and made some adaptations to the original ResNet50 model. Note we refer to model_one as our ResNet50-based model, rather than the original model itself. 
+
+1 Defined both models to produce output tensors of identical shape, (batch_size, class_count) or (None, 4). This entailed
+* Specifying Dense layers for the models' final output layers
+* Setting the number of units in the final output layersing as equal to the class_count value (4)
+* Selecting the Softmax activation functions for both models because it returns a probability distribution over three or more classes
+   
+2. Built both submodels with the Functional API because it supports more flexibility than the Sequential API. In particular, the Functional API
+* Affords more flexibility when combining pre-trained models with custom layers or sharing layers between models
+* Allows for explicit definition of the flow of data, enabl fine control over how layers connect and interact
+* Supports freezing layers and chaining models
+* Handles the complexities involved in ensembling models
+
+3. Set the image_size to (224, 224) for first_model because ResNet50-based models expect images of that size. For purposes of consistency, we set the image_size to (224, 224) for second_model as well.
+  
+4. Set label_mode for the three datasets to "int" (integer) because all images in this study belong to one of four classes.
+
+  
+5. 
+   
+6. Trained first_model and second_model on the CT chest scan images in the training_set (613 images) and validation_set (72 images) directories, maintaining for evaluation puposes 315 unseen images in the testing_set directory. All images pertained to one of four classes, with one class comprised of cancer-free images and the other three classes indicating three different types of cancer.
+
+7. 
 ## Adjustments and considerations for model compatibility
   
-To make our custom CNN and the pre-trained CNN compatible with each other for direct ensembling and transfer learning puposes, we made adjustments to the original ResNet50 model, and specified our custom CNN carefully. Note that we refer to our 'adjusted' ResNet50 model as our ResNet50-based model.   
+  
   
 We built a ResNet50-based model called first_model, for our pre-trained CNN. It's base (base_model) was the original ResNet50 model with weights reflecting the ImageNet database of images on which it was trained. To this base we made the following modifications:
   * Specified the img_size, channels, img_shape, and class_count to be identical's to those in the custom CNN
@@ -165,26 +190,7 @@ output_tensor = Dense(class_count, activation='softmax')(x)  # define output lay
 second_model = Model(inputs=input_tensor, outputs=output_tensor)  # define model 
 
 
-### Compatibility Considerations
-  
-To prepare the ResNet50-based model and the base CNN model to be direct ensembled, we 
 
-1 Defined both models to produce output tensors of identical shape, (batch_size, class_count) or (None, 4). This entailed
-* Specifying Dense layers for the models' final output layers
-* Setting the number of units in the final output layersing as equal to the class_count value (4)
-* Selecting the Softmax activation functions for both models because it returns a probability distribution over three or more classes
-   
-2. Built both submodels with the Functional API because it supports more flexibility than the Sequential API. In particular, the Functional API
-* Affords more flexibility when combining pre-trained models with custom layers or sharing layers between models
-* Allows for explicit definition of the flow of data, enabl fine control over how layers connect and interact
-* Supports freezing layers and chaining models
-* Handles the complexities involved in ensembling models
-
-3. Set the image_size to (224, 224) for first_model because ResNet50-based models expect images of that size. For purposes of consistency, we set the image_size to (224, 224) for second_model as well.
-  
-4. Set label_mode for the three datasets to "int" (integer) because all images in this study belong to one of four classes. 
-  
-5. Trained first_model and second_model on the CT chest scan images in the training_set (613 images) and validation_set (72 images) directories, maintaining for evaluation puposes 315 unseen images in the testing_set directory. All images pertained to one of four classes, with one class comprised of cancer-free images and the other three classes indicating three different types of cancer. 
 
 
 
