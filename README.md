@@ -276,56 +276,6 @@ The process of combining a pre-trained model with a custom CNN is called transfe
 
 
 
-
-
-
-
-
-
-
-
-## Table of results using CategoricalCrossEntropy loss function and class_mode='categorical' in data generator functions
-
-| model | loss | accuracy | val_loss | val_accuracy |
-|-------|------|----------|----------|--------------|
-| Base cnn  | 9.0188  | 0.1876  | 8.0590 | 0.2917 |
-| EfficientNetB3  | 0.0544 | 0.9804 | 0.8051 | 0.8444 |
-| ResNet50 | 0.0118 | 0.9951 | 2.0054 | 0.7587 |
-| InceptionV3 | 0.0439 | 0.9886 | 2.8829 | 0.5016 |
-| Ensemble | 0.3994 | 0.8750 | 0.2605 | 0.9750 |
-
-
-
-
-
-
-
-
-
-
-
-
-## Ensemble (basic mean/mode) architecture:
-
-![image](https://github.com/schr0841/cnn_project/blob/main/images/ensemble.png)
-
-
-
-## Ensemble validation set - figure out why only 1 epoch / why validation accuracy not showing up
-
-The **test_steps** parameter in the call to model.evaluate is currently evaluating to 1, so that is why there is only 1 epoch. It seems to be related to the data generator function that we are using - when this parameter was manually increased to 10, a warning was obtained that said the input ran out of data.
-
-The validation accuracy was originally not computed, but we added an appropriate line of code and printed these results to the console. We were then able to add the appropriate result to the table. As we expect, the validation accuracy is much higher than the individual accuracy of the three pre-trained models. 
-
-
-
-## Exploration of 2-step boosting ensemble procedure
-
-We attempt to train 2 models sequentially, where the second model learns from the errors of the first model. Since our best-performing models are EfficientNetB3 and ResNet50, we will use those models to form our boosted ensemble. We copy the code for these models into a new cell. However we are unable to get it to work correctly, and are leaving this as a 'future improvement' that could be worked on. 
-
-We asked Claude AI if it could come up with an implementation of simple boosted ensemble models and it was able to do that, but the code it provided assumed we have a clear split among the features $X$ and target $y$, whereas here we do not. We have included it as an extra supplementary notebook titled "gemini_boosted_ensemble.ipynb" to look at for further development.
-
-
 # Ensembling and Chaining Models
 
 We defined, compiled, and trained the ResNet50-based (first_model) and the base CNN model (second_model) individually before ensembling and chaining the two models. We wanted to see if a noticeable improvement in accuracy was possible by combining first_model and second_model over each of the submodels, and whether the method used to combine models (ensembling versus chaining) made a difference in accuracy scores.
