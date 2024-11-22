@@ -78,24 +78,34 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
    * Defined the same data augmentation layers as in our custom CNN and applied data augmentation to the input tensor
    * Applied the same rescaling defined in our custom CNN and specified the input tensor as the scaled inputs
    * Because the original ResNet50 model is pretrained on over a million images in 1,000 classes in the ImageNet dataset, it needed to be modified to be capable of classifying our chest ct scans into four distinct classes. To do this we
+       
       * Avoided outputting the 1,000-class predictions for which ResNet50 was originally trained by removing its top layer
-      * Avoided re-training ResNet50s pre-trained knowledge by making the base_model's layers untrainable
+       
+        ResNet50, when its top layer is excluded, outputs a feature map with shape (7, 7, 2048). Adding custom layers on top of the ResNet50 base_model allowed us to 
+        adapt the pretrained model to fit our specific needs (e.g., completing a four-class classification task, ensembling with the base CNN model, and chaining with the 
+        base CNN model). Furthermore, the added BatchNormalization and Dropout layers assisted with regularizing the model, or improving its generalization on unseen 
+        data. At the same time, the custom Dense(256) layer reduced the dimensionality of the ResNet50 base_model's output, making it more managable for the final output 
+        layer to generate probabilities for each class.
+            
+      * Avoided re-training ResNet50s pre-trained knowledge by "freezing" the ResNet50 layers, or making them untrainable
+            
+         Freezing layers enabled the ResNet50 layers of first_model to retain the features it learned from pretraining on the much larger ImageNet data set. In other 
+         words, freezing layers prevented the learned features from being overwritten. Common in transfer learning, layer freezing effectively turns a pretrained model 
+         into a feature extractor. The custom layers we added to the "feature extractor" then produced the four-class classification, drawing from the ResNet50's learned 
+         features. ResNet50 without its top layer (as we specified) outputs feature maps instead of classification predictions. The feature maps become the inputs for the 
+         subsequent custom layers, which will ultimately result in the classification predictions.
+            
       * Added a BatchNormalization layer, a 0.3 Dropout layer, and a Dense output layer designed to produce predictions for a four-class problem
-   
-6. Trained first_model and second_model on the CT chest scan images in the training_set (613 images) and validation_set (72 images) directories. we maintained for evaluation puposes 315 unseen images in the testing_set directory. All images pertained to one of four classes, with one class comprised of cancer-free images and the other three classes indicating three different types of cancer.
+           
+        The BatchNormalization(axis=-1) layer normalized the ResNet50 layers' output, improving performance and reducing overfitting 
 
-7. Built both first_model and second_model with the Functional API. The Functional API offered more control over inputs, outputs, and connections, and was better suited to handle the complexities involved in model ensembling than the Sequential API. The Functional API supported more flexibility in complex model architecture, including combining pre-trained models with custom layers. Because Functional API allowed data flow to be explicitly defined, it supported freezing layers and chaining models.
+
+       
+    
+  
   
 
-
-
-To prevent the ResNet50 base_model within first_model from generating a 1,000-classs classification for the ct scans in the input dataset, we "removed" ResNet50's output layer by setting include_top=False. To keep ResNet50's pretrained weights from being updated during training on our data, we froze its layers by specifying layer.trainable = False. Freezing layers enabled the ResNet50 base_model to retain the features it learned from pretraining on the much larger ImageNet data set. In other words, freezing layers prevented the learned features from being overwritten. Common in transfer learning, layer freezing effectively turns a pretrained model into a feature extractor. The custom layers we added to the "feature extractor" then produced the four-class classification, drawing from the ResNet50's learned features.
-
-Specifically, we added the following custom layers:    
-
-a) base_model.output layer to extract the output of the ResNet50 base_model and connect it with the subsequent custom layers. base_model.output represents the features learned by the pretrained ResNet50 model. ResNet50 without its top layer (as we've specified) outputs feature maps instead of classification predictions. The feature maps become the inputs for the subsequent custom layers, which will ultimately result in the classification predictions     
-
-b) BatchNormalization(axis=-1) layer to normalize the ResNet50 base model's output, improving performance and reducing overfitting    
+b)    
 
 c) Dense(256, activation='relu) layer to learn more complex patterns from the high-level features provided by ResNet50. These more complex patterns will became relevant to the classification task at hand, while the ReLU activation function supported the custom layers to model more intricate relationships between features    
 
@@ -103,7 +113,7 @@ d) Dropout(0.3) to prevent overfitting by forcing the model to learn more robust
 
 e) Dense(class_count, activation = 'softmax') to output a probability distribution across the classes (whose number is given by class_count). Each value in the probability distribution corresponds to the predicted probability that the input image belongs to a given class    
 
-ResNet50, when its top layer is excluded, outputs a feature map with shape (7, 7, 2048). Adding custom layers on top of the ResNet50 base_model allowed us to adapt the pretrained model to fit our specific needs (e.g., completing a four-class classification task, ensembling with the base CNN model, and chaining with the base CNN model). Furthermore, the added BatchNormalization and Dropout layers assisted with regularizing the model, or improving its generalization on unseen data. At the same time, the custom Dense(256) layer reduced the dimensionality of the ResNet50 base_model's output, making it more managable for the final output layer to generate probabilities for each class.
+
 
   
 ### first_model, the ResNet50-based model  
