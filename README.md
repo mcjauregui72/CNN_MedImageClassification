@@ -54,9 +54,9 @@ The benefits of pre-training include improved performance, better generalization
 
 Pre-trained models often generalize better to new tasks because they start with a solid understanding of basic features and patterns, which can help improve accuracy on the new task. Pre-training can be a powerful technique, especially when data are scarce or where training a model from scratch would be impractical given resource constraints.  
 
-### Compatibility Considerations
+### Submodel Compatibility Considerations
   
-To ensure make our custom CNN and the pre-trained CNN would be compatible with each other for direct ensembling and transfer learning puposes, we took the following precautions and made some adaptations to the original ResNet50 model. Note we refer to model_one as our ResNet50-based model, rather than the original model itself. 
+To ensure our custom CNN and the pre-trained CNN would be compatible with each other for direct ensembling and transfer learning puposes, we took the following precautions and made some adaptations to the original ResNet50 model. Note we refer to model_one as our ResNet50-based model, rather than the original model itself. 
 
 1 Defined both models to produce output tensors of identical shape, (batch_size, class_count) or (None, 4). This entailed
 * Specifying Dense layers for the models' final output layers
@@ -72,19 +72,10 @@ To ensure make our custom CNN and the pre-trained CNN would be compatible with e
 3. Set the image_size to (224, 224) for first_model because ResNet50-based models expect images of that size. For purposes of consistency, we set the image_size to (224, 224) for second_model as well.
   
 4. Set label_mode for the three datasets to "int" (integer) because all images in this study belong to one of four classes.
-
   
-5. 
-   
-6. Trained first_model and second_model on the CT chest scan images in the training_set (613 images) and validation_set (72 images) directories, maintaining for evaluation puposes 315 unseen images in the testing_set directory. All images pertained to one of four classes, with one class comprised of cancer-free images and the other three classes indicating three different types of cancer.
-
-7. 
-## Adjustments and considerations for model compatibility
+5. Built a ResNet50-based model (first_model) for our pre-trained CNN. It's base (base_model) was the original ResNet50 model with weights reflecting the ImageNet database of images on which it was trained. The original ResNet50 model is pretrained on over a million images in 1,000 classes in the ImageNet dataset. To make it capable of classifying our chest ct scans into four distinct classes, we had to add some custom layers to it and remove its original output layer. These modifications to the ResNet50 model became our 'first_model'.
   
-  
-  
-We built a ResNet50-based model called first_model, for our pre-trained CNN. It's base (base_model) was the original ResNet50 model with weights reflecting the ImageNet database of images on which it was trained. To this base we made the following modifications:
-  * Specified the img_size, channels, img_shape, and class_count to be identical's to those in the custom CNN
+  * Specified the img_size, channels, img_shape, and class_count to be identical in both models
   * Defined the same data augmentation layers as in our custom CNN
   * Applied data augmentation to the input tensor
   * Applied the same rescaling defined in our custom CNN
@@ -95,212 +86,13 @@ We built a ResNet50-based model called first_model, for our pre-trained CNN. It'
     *  BatchNormalization layer
     *  0.3 Dropout layer
     *  Dense output layer capable of producing predictions for a four-class problem
-  
-To prevent errors related to ensembling a Functional API model and a Sequential API model, we built both first_model and second_model with the Functional API. The Functional API offered more control over inputs, outputs, and connections, and was better suited to handle the complexities involved in model ensembling than the Sequential. The Functional API supported more flexibility in complex model architecture than the Sequential API, including combining pre-trained models with custom layers. Because Functional API allowed data flow to be explicitly defined, it supported freezing layers and chaining models.
-  
-  
-### first_model, the ResNet50-based model  
-from tensorflow.keras.layers import BatchNormalization  
-  
-img_size = (224, 224)                               # 224x224 what ResNet50 expects  
-channels = 3                                        # one channel each for Red, Blue, Green (color images)  
-img_shape = (img_size[0], img_size[1], channels)  
-class_count = len(training_set.class_names)         # class_names auto defined when image_dataset_from_directory creates dataset  
-  
-inputs = Input(shape=(224, 224, 3))                 # define input tensor
-  
-data_augmentation = tf.keras.Sequential([RandomFlip("horizontal", RandomRotation(0.2), RandomZoom(0.2)])  # define data augmentation layers directly from tf.keras.layers  
-  
-augmented_inputs = data_augmentation(inputs)  #apply augmentation to input tensor, store results in 'augmented_inputs'
-  
-scaled_inputs = Rescaling(1./255)(augmented_inputs)  # normalize pixel values; explicitly indicate rescaling to previous layer's inputs  
-  
-base_model = ResNet50(       # define ResNet50-based model as base model for first_model  
-    weights='imagenet',      # use the weights resulting from training on ImageNet database
-    include_top=False,       # ignore top layer of original ResNet50; we'll define new top layer with only 4 classes
-    input_tensor=scaled_inputs,   # instantiate with scaled_inputs as input tensor  
-    pooling='max')                # base model outputs tensor compatible with Dense layers, no need to flatten tensor  
-
-for layer in base_model.layers:   
-    layer.trainable = False  # freeze ResNet50 layers to prevent re-training pre-training    
-  
-x = base_model.output  # base_model's output to get custom layers on top of it
-x = BatchNormalization(axis=-1)(x)    # including BatchNormalization before Dense can yield better training and performance  
-x = Dense(256, activation='relu')(x)  
-x = Dropout(0.3)(x)  
-  
-outputs = Dense(class_count, activation='softmax')(x)  # define layer, output vector with 4 classes to allow ensembling 
-
-first_model = Model(   # because outputs variable represents model final output, 
-inputs=inputs,         # when defining model using Model class,
-outputs=outputs        # use outputs = outputs
-)    
-
-Following our first_model build, we defined our optimizer, model file path, EarlyStopping and ModelCheckpoint callbacks before compiling, training, and saving the model.      
-optimizer = Adam()
-base_dir = '/content/drive/MyDrive/BOOTCAMP/ColabNotebooks/ProjectWithGreg/Data'
-early_stopping = EarlyStopping(monitor='val_accuracy', patience=20, restore_best_weights=True, verbose=1)
-checkpoint = ModelCheckpoint(first_filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
-  
-if not os.path.exists(base_dir):                      # create base directory if it doesn't exist
-    os.makedirs(base_dir)
-first_filepath = os.path.join(base_dir, 'first_model.keras')     # define full file path including base directory
-  
-first_model.compile(optimizer=optimizer, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-  
-history = first_model.fit(
-    x=training_set,
-    epochs=100,
-    verbose=1,
-    validation_data=validation_set,
-    callbacks=[checkpoint, early_stopping]
-)
    
-first_model.save(first_filepath)
+6. Trained first_model and second_model on the CT chest scan images in the training_set (613 images) and validation_set (72 images) directories. we maintained for evaluation puposes 315 unseen images in the testing_set directory. All images pertained to one of four classes, with one class comprised of cancer-free images and the other three classes indicating three different types of cancer.
+
+7. Built both first_model and second_model with the Functional API. The Functional API offered more control over inputs, outputs, and connections, and was better suited to handle the complexities involved in model ensembling than the Sequential API. The Functional API supported more flexibility in complex model architecture, including combining pre-trained models with custom layers. Because Functional API allowed data flow to be explicitly defined, it supported freezing layers and chaining models.
   
-  
-### second_model, the custom CNN  
-from tensorflow.keras.layers import Input, RandomFlip, RandomRotation, RandomZoom, Dense  
-from tensorflow.keras.layers import Rescaling, Conv2D, MaxPooling2D, Dropout, Flatten  
-from tensorflow.keras.models import Model  
-  
-img_size = (224, 224)       # resize to 224x224, what ResNet50 expects -- needed for chaining models    
-channels = 3                # one channel each for Red, Blue, Green (color images)   
-img_shape = (img_size[0], img_size[1], channels)     
-class_count = len(training_set.class_names)  # class_names auto defined when image_dataset_from_directory creates dataset    
-input_tensor = Input(shape=img_shape)        # define input layer
-    
-x = RandomFlip("horizontal")(input_tensor)   # apply 3 data augmentation layers  
-x = RandomRotation(0.2)(x)  
-x = RandomZoom(0.2)(x)  
-x = Rescaling(1./255)(x)                     #apply rescalling
-x = Conv2D(filters=32, kernel_size=(3, 3), activation='relu')(x)  
-x = MaxPooling2D(pool_size=(2, 2))(x)  
-x = Conv2D(filters=32, kernel_size=(3, 3), activation='relu')(x)  
-x = MaxPooling2D(pool_size=(2, 2))(x)  
-x = Dropout(0.25)(x)  
-x = Conv2D(filters=64, kernel_size=(3, 3), activation='relu')(x)  
-x = MaxPooling2D(pool_size=(2, 2))(x)  
-x = Dropout(0.25)(x)  
-x = Flatten()(x)  
-x = Dense(128, activation='relu')(x)  
-x = Dropout(0.25)(x)  
-  
-output_tensor = Dense(class_count, activation='softmax')(x)  # define output layer for 4-class problem
-second_model = Model(inputs=input_tensor, outputs=output_tensor)  # define model 
 
 
-
-
-
-
-<img width="914" alt="Screenshot 00a" src="https://github.com/user-attachments/assets/1c553bd2-3721-4a88-a616-a1523fc68a76">
-<img width="915" alt="Screenshot 00b" src="https://github.com/user-attachments/assets/a056c7aa-509f-4825-8a81-d6ed52e130a4">
-## ensemble_model, combining the predictions of first_model and second-model
-  
-  
-Ensembling models entails combining the individual predictions of multiple models on the same dataset, in an attempt to make better predictions on that dataset. Ensemble models can improve upon the predictive performance of individual models. If different models make different types of errors, we may be able to reduce the overall error rate by combining their predictions. 
-
-In this project, we combined our two submodels' predictions in model_three, an ensemble model that averaged the submodels' output. Here, each model contributing to model_three wass weighted equally in the ensemmble model. It is possible to configure a weighted average ensemble in which better-performing submodels contribute more to the ensemble than poorer-performing submodels. 
-
-There are additional techniques for combining submodel predictions. In bootstrap aggregating, multiple models are trained on different subsets of the same training data and then ensembled. Boosting models occurs when models are trained sequentially, allowing later models to correct the errors made by earlier models. The voting technique makes a final prediction by taking a majority vote of the predictions made by the various submodels. 
-
-Ensemble models can yield improved accuracy over their individual submodels by reducing overfitting. They may exhibit more robustness to changes in input data than their submodels. On the other hand, ensemble models can entail increased complexity, reduced ease of interpretability, and greater computational costs than their submodels individually.    
-  
-    
-### Ensembling first_model and second_model: preparing for and building the ensemble_model
-
-First, we defined the full file paths to our best saved models for first_model and second_model, and loaded them from saved. keras.
-
-import tensorflow as tf
-from tensorflow.keras.models import load_model
-from tensorflow.keras.layers import Input, Average
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import BatchNormalization
-
-first_filepath = os.path.join(base_dir, 'first_model.keras')     
-second_filepath = os.path.join(base_dir, 'second_model.keras')   
-first_model = load_model(first_filepath)                         
-second_model = load_model(second_filepath)
-
-Second, we extracted labels from the TensorFlow datasets (training_set, testing_set, validation_set) we had created before building first_model and second_model, using the tf.keras.preprocessing.image_dataset_from_directory method. Ensemble models need labels in order to compute loss (by comparing predictions to true lables) and update models during training. 
-
-Because training_set and validation_set are tf.data.Dataset objects that return batches of (images, labels), we could loop through the datasets to extract images and lables and combine batch-wise labels in single tensors. 
-
-def get_labels(dataset):
-    labels = []
-    for _, batch_labels in dataset:          # loop iterates over dataset, where batch_labels contains labels for batch of images
-                                             # _ ignores image data; we're only interested in labels
-        labels.append(batch_labels.numpy())  # convert TensorFlow tensors (which hold labels) into NumPy arrays
-                                             # convert label arrays for each batch appended to labels list
-    return np.concatenate(labels, axis=0)    # after iterating through all batches, merge all label arrays from list into
-                                             # single NumPy array, resulting in single array containing all labels from dataset
-y_train = get_labels(training_set)           # y_train will contain all extracted labels from training_set
-y_test = get_labels(testing_set)             # y_test will contain all extracted labels from testing_set
-y_val = get_labels(validation_set)           # y_val will contain all extacted labels from validation_set
-
-    
-Third, we generated submodel predictions for the training and validation datasets. 
-    
-preds_first_model_train = first_model.predict(training_set)
-preds_second_model_train = second_model.predict(training_set)
-preds_first_model_val = first_model.predict(validation_set)
-preds_second_model_val = second_model.predict(validation_set)
-
-  
-Fourth, we define EarlyStopping and ModelCheckpoint callbacks and a file to save the ensemble_model. 
-  
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-early_stopping = EarlyStopping(monitor='val_accuracy', patience=20, restore_best_weights=True, verbose=1)
-ensemble_filepath = os.path.join(base_dir, 'ensemble_model.keras')     # define new file path to save ensemble_model
-checkpoint = ModelCheckpoint(ensemble_filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')   # save max best ensemble_model
-
-  
-Fifth, we built and trained the ensemble_model to process the combined predictions. The ensemble model's input shape reflected how outputs would get combined, two predictions per class, with an output shape of (None, 4). 
-  
-from tensorflow.keras import Model, Input
-from tensorflow.keras.layers import Average, Dense
-from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
-    
-ensemble_input_train = (preds_first_model_train + preds_second_model_train) / 2     # average both models' predictions for 'training set'
-ensemble_input_val = (preds_first_model_val + preds_second_model_val) / 2           # average both models' predictions for 'validation set'
-  
-ensemble_input = Input(shape=(4,))              # build ensemble_model, define input layer with shape corresponding to four classe
-final_output = Dense(4, activation='softmax')(ensemble_input)     # add dense layer, suited for 4-class problem
-ensemble_model = Model(inputs=ensemble_input, outputs=final_output)   # define ensemble model
-  
-ensemble_model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])   # compile ensemble model
-  
-history = ensemble_model.fit(                           # Keras fit method trains model for fixed number of epochs using provided training data and labels,
-                                                        # returns history object with loss & accuracy values at each epoch
-    x=ensemble_input_train,                             # specifies input data as averaged predictions from submodels
-    y=y_train,                                          # use labels from original dataset to specify training data labels; y_train represents true labels
-                                                        # corresponding to ensemble_input_train predictions
-    validation_data=(ensemble_input_val, y_val),        # specify validation data to be used to evaluate model after each epoch: ensemble_input_val contains  
-                                                        # averaged predictions from submodels on validation set; y_val contains true labels
-    epochs=100,                                         # model trains for 100 epochs, updating weights after each batch of data within epoch
-    callbacks=[early_stopping, checkpoint],             # stop training early if val loss or accuracy doesn't improve, helps prevent overfitting;
-                                                        # checkpoint saves model’s weights at certain points to ensure restoration of best model
-    verbose=1                                           # detailed progress of each epoch: loss, accuracy, validation metrics displayed in output
-)
-  
-ensemble_model.save(ensemble_filepath)                  # save model in specified directory
-  
-  
-## Transfer Learning   
-
-After pre-training, a model can be applied to a new, specific dataset and classification task, a process called transfer learning. The pre-trained model's weights, optimized during pre-training, become the starting point for training on a new, often smaller, dataset. The model learns the specifics of the new task while leveraging the general features it learned during pre-training. In our project, the smaller dataset consisted of the CT-Scan images with different types of chest cancer versus normal cells. The ResNet50 model (pre_trained  
-
-
-
-
-
-# Ensembling and Chaining Models
-
-
-### Building first_model from pretrained ResNet50
-
-The original ResNet50 model is pretrained on over a million images in 1,000 classes in the ImageNet dataset. To make it capable of classifying our chest ct scans into four distinct classes, we had to add some custom layers to it and remove its original output layer. These modifications to the ResNet50 model became our 'first_model'.
 
 To prevent the ResNet50 base_model within first_model from generating a 1,000-classs classification for the ct scans in the input dataset, we "removed" ResNet50's output layer by setting include_top=False. To keep ResNet50's pretrained weights from being updated during training on our data, we froze its layers by specifying layer.trainable = False. Freezing layers enabled the ResNet50 base_model to retain the features it learned from pretraining on the much larger ImageNet data set. In other words, freezing layers prevented the learned features from being overwritten. Common in transfer learning, layer freezing effectively turns a pretrained model into a feature extractor. The custom layers we added to the "feature extractor" then produced the four-class classification, drawing from the ResNet50's learned features.
 
@@ -317,6 +109,67 @@ d) Dropout(0.3) to prevent overfitting by forcing the model to learn more robust
 e) Dense(class_count, activation = 'softmax') to output a probability distribution across the classes (whose number is given by class_count). Each value in the probability distribution corresponds to the predicted probability that the input image belongs to a given class    
 
 ResNet50, when its top layer is excluded, outputs a feature map with shape (7, 7, 2048). Adding custom layers on top of the ResNet50 base_model allowed us to adapt the pretrained model to fit our specific needs (e.g., completing a four-class classification task, ensembling with the base CNN model, and chaining with the base CNN model). Furthermore, the added BatchNormalization and Dropout layers assisted with regularizing the model, or improving its generalization on unseen data. At the same time, the custom Dense(256) layer reduced the dimensionality of the ResNet50 base_model's output, making it more managable for the final output layer to generate probabilities for each class.
+
+  
+### first_model, the ResNet50-based model  
+  
+  
+Results:
+  
+  
+### second_model, the custom CNN  
+  
+
+Results:
+
+
+
+
+
+
+<img width="914" alt="Screenshot 00a" src="https://github.com/user-attachments/assets/1c553bd2-3721-4a88-a616-a1523fc68a76">
+<img width="915" alt="Screenshot 00b" src="https://github.com/user-attachments/assets/a056c7aa-509f-4825-8a81-d6ed52e130a4">
+## ensemble_model, combining the predictions of first_model and second-model
+
+  
+### Ensembling Models
+  
+Ensembling models entails combining the individual predictions of multiple models on the same dataset, in an attempt to make better predictions on that dataset. Ensemble models can improve upon the predictive performance of individual models. If different models make different types of errors, we may be able to reduce the overall error rate by combining their predictions. 
+
+In this project, we combined our two submodels' predictions in model_three, an ensemble model that averaged the submodels' output. Here, each model contributing to model_three wass weighted equally in the ensemmble model. It is possible to configure a weighted average ensemble in which better-performing submodels contribute more to the ensemble than poorer-performing submodels. 
+
+There are additional techniques for combining submodel predictions. In bootstrap aggregating, multiple models are trained on different subsets of the same training data and then ensembled. Boosting models occurs when models are trained sequentially, allowing later models to correct the errors made by earlier models. The voting technique makes a final prediction by taking a majority vote of the predictions made by the various submodels. 
+
+Ensemble models can yield improved accuracy over their individual submodels by reducing overfitting. They may exhibit more robustness to changes in input data than their submodels. On the other hand, ensemble models can entail increased complexity, reduced ease of interpretability, and greater computational costs than their submodels individually.    
+  
+  
+We took the following steps to prepare for and build the ensemble_mode:
+
+1. Defined the full file paths to our best saved first_model and second_model, and loaded them from saved. keras.
+   
+3. Extracted labels from the TensorFlow datasets (training_set, testing_set, validation_set) we had created by using the tf.keras.preprocessing.image_dataset_from_directory method. Ensemble models need labels in order to compute loss (by comparing predictions to true lables) and update models during training. 
+  
+3. Generated submodel predictions for the training and validation datasets. 
+  
+4. define EarlyStopping and ModelCheckpoint callbacks and a filepath to save the best ensemble_model. 
+  
+5. Built and trained the ensemble_model to process the combined predictions. The ensemble model's input shape reflected how outputs would get combined, two predictions per class, with an output shape of (None, 4).
+
+Results:
+
+    
+## Transfer Learning   
+
+An alternative to ensembling two models is chaining them. After pre-training, a model can be applied to a new, specific dataset and classification task, a process called transfer learning. The pre-trained model's weights, optimized during pre-training, become the starting point for training on a new, often smaller, dataset. The model learns the specifics of the new task while leveraging the general features it learned during pre-training. In our project, the smaller dataset consisted of the CT-Scan images with different types of chest cancer versus normal cells. The ResNet50 model (pre_trained  
+
+
+
+
+
+# Ensembling and Chaining Models
+
+
+### Building first_model from pretrained ResNet50
 
 
 ### first_model
