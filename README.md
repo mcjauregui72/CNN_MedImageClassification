@@ -9,10 +9,10 @@ What happens if we add to our model a pre-trained CNN model by employing transfe
 
 We defined, compiled, and trained two CNN submodels - one custom and one pre-trained - individually before ensembling and chaining them. We looked for a noticeable improvement in accuracy between the ensembled model and/or the chained model, over each of the two submodels.      
   
-* a) the pre-trained ResNet50 model (model_one)   
-* b) our custom CNN (model_two)  
-* c) ensembling the output of model_one and model_two (ensemble_model)  
-* d) chaining model_one and model_two into model_four (transfer learning)  
+ a) the pre-trained ResNet50 model (model_one)   
+ b) our custom CNN (model_two)  
+ c) ensembling the output of model_one and model_two (ensemble_model)  
+ d) chaining model_one and model_two into model_four (transfer learning)  
 
 Concepts discussed:
 Convolutional Neural Networks  
@@ -73,19 +73,14 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
   
 4. Set label_mode for the three datasets to "int" (integer) because all images in this study belong to one of four classes.
   
-5. Built our pre-trained CNN as a ResNet50-based model (first_model). The base of first_model (base_model) was the original ResNet50 model with weights reflecting the ImageNet database of images on which it was trained. The original ResNet50 model is pretrained on over a million images in 1,000 classes in the ImageNet dataset. To make it capable of classifying our chest ct scans into four distinct classes, we had to add some custom layers to it and remove its original output layer. These modifications to the ResNet50 model became our 'first_model'.
-  
-  * Specified the img_size, channels, img_shape, and class_count to be identical in both models
-  * Defined the same data augmentation layers as in our custom CNN
-  * Applied data augmentation to the input tensor
-  * Applied the same rescaling defined in our custom CNN
-  * Specified the input tensor as the scaled inputs
-  * Avoided outputting the 1,000-class predictions for which ResNet50 was originally trained by removing its top layer
-  * Avoided re-training ResNet50s pre-trained knowledge by making the base_model's layers untrainable
-  * Added custom layers to the base_model to produce first_model, which was capable of outputting predictions as similarly to second_model as possible, including
-    *  BatchNormalization layer
-    *  0.3 Dropout layer
-    *  Dense output layer capable of producing predictions for a four-class problem
+5. Built our pre-trained CNN as a model based on the ResNet50-based model, but with modifications:
+   * Specified the img_size, channels, img_shape, and class_count to be identical in both models
+   * Defined the same data augmentation layers as in our custom CNN and applied data augmentation to the input tensor
+   * Applied the same rescaling defined in our custom CNN and specified the input tensor as the scaled inputs
+   * Because the original ResNet50 model is pretrained on over a million images in 1,000 classes in the ImageNet dataset, it needed to be modified to be capable of classifying our chest ct scans into four distinct classes. To do this we
+      * Avoided outputting the 1,000-class predictions for which ResNet50 was originally trained by removing its top layer
+      * Avoided re-training ResNet50s pre-trained knowledge by making the base_model's layers untrainable
+      * Added a BatchNormalization layer, a 0.3 Dropout layer, and a Dense output layer designed to produce predictions for a four-class problem
    
 6. Trained first_model and second_model on the CT chest scan images in the training_set (613 images) and validation_set (72 images) directories. we maintained for evaluation puposes 315 unseen images in the testing_set directory. All images pertained to one of four classes, with one class comprised of cancer-free images and the other three classes indicating three different types of cancer.
 
