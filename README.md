@@ -56,9 +56,9 @@ Pre-trained models often generalize better to new tasks because they start with 
 
 ### Submodel Compatibility Considerations
   
-To ensure our custom CNN and the pre-trained CNN would be compatible with each other for direct ensembling and transfer learning puposes, we took the following precautions and made some adaptations to the original ResNet50 model. Note we refer to model_one as our ResNet50-based model, rather than the original model itself. 
+To ensure our custom CNN and the pre-trained CNN would be compatible with each other for direct ensembling and transfer learning puposes, we took the following precautions and made adaptations to the original ResNet50 model. (Note we refer to model_one as our ResNet50-based model, rather than the original model itself.) 
 
-1 Defined both models to produce output tensors of identical shape, (batch_size, class_count) or (None, 4). This entailed
+1 Defined both models to produce output tensors of identical shape, (batch_size, class_count) or (None, 4), which entailed
 * Specifying Dense layers for the models' final output layers
 * Setting the number of units in the final output layersing as equal to the class_count value (4)
 * Selecting the Softmax activation functions for both models because it returns a probability distribution over three or more classes
@@ -73,7 +73,7 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
   
 4. Set label_mode for the three datasets to "int" (integer) because all images in this study belong to one of four classes.
   
-5. Built a ResNet50-based model (first_model) for our pre-trained CNN. It's base (base_model) was the original ResNet50 model with weights reflecting the ImageNet database of images on which it was trained. The original ResNet50 model is pretrained on over a million images in 1,000 classes in the ImageNet dataset. To make it capable of classifying our chest ct scans into four distinct classes, we had to add some custom layers to it and remove its original output layer. These modifications to the ResNet50 model became our 'first_model'.
+5. Built our pre-trained CNN as a ResNet50-based model (first_model). The base of first_model (base_model) was the original ResNet50 model with weights reflecting the ImageNet database of images on which it was trained. The original ResNet50 model is pretrained on over a million images in 1,000 classes in the ImageNet dataset. To make it capable of classifying our chest ct scans into four distinct classes, we had to add some custom layers to it and remove its original output layer. These modifications to the ResNet50 model became our 'first_model'.
   
   * Specified the img_size, channels, img_shape, and class_count to be identical in both models
   * Defined the same data augmentation layers as in our custom CNN
