@@ -3,29 +3,26 @@
 
 ## Executive Summary
 
-We defined, compiled, and trained two CNN submodels - one custom and one pre-trained - individually before ensembling and chaining them. We looked for a noticeable improvement in accuracy by combining the submodels over each of the submodels, individually.    
-
-The data for this project was obtained here: https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images  
-  
-## Overview and Purpose
-  
 Can we train a custom convolutional neural network (CNN) model from scratch to classify CT chest scan images as indicating one of the following four categories (classes): Adenocarcinoma, Large cell carcinoma, Squamous cell carcinoma, or normal cells? How well does the model perform?
   
 What happens if we add to our model a pre-trained CNN model by employing transfer learning and model ensembling? Will we see improved accuracy scores with either of these methods?
-  
-In our project, we compared the accuracy values obtained with our dataset of chest CT images in the following four model scenarios:  
-a) the pre-trained ResNet50 model (model_one)   
-b) our custom CNN (model_two)  
-c) ensembling the output of model_one and model_two (model_three)  
-d) chaining model_one and model_two into model_four (transfer learning)  
 
-Concepts:
+We defined, compiled, and trained two CNN submodels - one custom and one pre-trained - individually before ensembling and chaining them. We looked for a noticeable improvement in accuracy between the ensembled model and/or the chained model, over each of the two submodels.      
+  
+* a) the pre-trained ResNet50 model (model_one)   
+* b) our custom CNN (model_two)  
+* c) ensembling the output of model_one and model_two (ensemble_model)  
+* d) chaining model_one and model_two into model_four (transfer learning)  
+
+Concepts discussed:
 Convolutional Neural Networks  
 Pretained models  
 Model Ensembling  
 Transfer Learning/model chaining  
   
+The data for this project was obtained here: https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images  
   
+    
 ## Convolutional Neural Networks  
   
 CNNs use convolutional and pooling layers to automatically and hierarchically learn features from images, and use fully connected layers to classify those features into predefined categories. This process enables CNNs to effectively handle and classify complex visual data.  
@@ -59,9 +56,9 @@ Pre-trained models often generalize better to new tasks because they start with 
 
 ## Model adjustments and considerations for model compatibility
   
-To make our custom CNN and the pre-trained CNN compatible with each other for direct ensembling and transfer learning puposes, we needed to make adjustments to the original ResNet50 model, and specify our custom CNN carefully. Note that we referred to our 'adjusted' ResNet50 model as our ResNet50-based model.   
+To make our custom CNN and the pre-trained CNN compatible with each other for direct ensembling and transfer learning puposes, we made adjustments to the original ResNet50 model, and specified our custom CNN carefully. Note that we refer to our 'adjusted' ResNet50 model as our ResNet50-based model.   
   
-For our pre-trained model, we built a ResNet50-based model called first_model. It's base (base_model) was the original ResNet50 model with weights reflecting the ImageNet database of images on which it was trained. To this base we made the following modifications:
+We built a ResNet50-based model called first_model, for our pre-trained CNN. It's base (base_model) was the original ResNet50 model with weights reflecting the ImageNet database of images on which it was trained. To this base we made the following modifications:
   * Specified the img_size, channels, img_shape, and class_count to be identical's to those in the custom CNN
   * Defined the same data augmentation layers as in our custom CNN
   * Applied data augmentation to the input tensor
@@ -75,9 +72,7 @@ For our pre-trained model, we built a ResNet50-based model called first_model. I
     *  Dense output layer capable of producing predictions for a four-class problem
   
 To prevent errors related to ensembling a Functional API model and a Sequential API model, we built both first_model and second_model with the Functional API. The Functional API offered more control over inputs, outputs, and connections, and was better suited to handle the complexities involved in model ensembling than the Sequential. The Functional API supported more flexibility in complex model architecture than the Sequential API, including combining pre-trained models with custom layers. Because Functional API allowed data flow to be explicitly defined, it supported freezing layers and chaining models.
-
-     
-## The two CNN sub-models 
+  
   
 ### first_model, the ResNet50-based model  
 from tensorflow.keras.layers import BatchNormalization  
@@ -117,7 +112,6 @@ outputs=outputs        # use outputs = outputs
 )    
 
 Following our first_model build, we defined our optimizer, model file path, EarlyStopping and ModelCheckpoint callbacks before compiling, training, and saving the model.      
-  
 optimizer = Adam()
 base_dir = '/content/drive/MyDrive/BOOTCAMP/ColabNotebooks/ProjectWithGreg/Data'
 early_stopping = EarlyStopping(monitor='val_accuracy', patience=20, restore_best_weights=True, verbose=1)
@@ -138,11 +132,9 @@ history = first_model.fit(
 )
    
 first_model.save(first_filepath)
-
-
-
   
-### second_model, custom CNN  
+  
+### second_model, the custom CNN  
 from tensorflow.keras.layers import Input, RandomFlip, RandomRotation, RandomZoom, Dense  
 from tensorflow.keras.layers import Rescaling, Conv2D, MaxPooling2D, Dropout, Flatten  
 from tensorflow.keras.models import Model  
@@ -173,20 +165,19 @@ output_tensor = Dense(class_count, activation='softmax')(x)  # define output lay
 second_model = Model(inputs=input_tensor, outputs=output_tensor)  # define model 
 
   
-## Model Ensembling  
+## ensemble_model, combining the predictions of first_model and second-model
   
-## Ensembling models
+  
+Ensembling models entails combining the individual predictions of multiple models on the same dataset, in an attempt to make better predictions on that dataset. Ensemble models can improve upon the predictive performance of individual models. If different models make different types of errors, we may be able to reduce the overall error rate by combining their predictions. 
 
-Ensembling models entails combining the individual predictions of multiple models on the same dataset to try to make better predictions on that dataset. Ensemble models can improve upon the predictive performance of individual models. The idea behind ensembling models is that if different models make different types of errors, we may reduce the overall error rate by combining their predictions. 
-
-In this project, we chose to combine our two submodels' predictions in an ensemble model, model_three, by averaging their individual output. Here, each model contributing to model_three is weighted equally in the ensemmble model. It is possible, however, to configure a weighted average ensemble in which better-performing submodels contribute more to the ensemble than poorer-performing submodels. 
+In this project, we combined our two submodels' predictions in model_three, an ensemble model that averaged the submodels' output. Here, each model contributing to model_three wass weighted equally in the ensemmble model. It is possible to configure a weighted average ensemble in which better-performing submodels contribute more to the ensemble than poorer-performing submodels. 
 
 There are additional techniques for combining submodel predictions. In bootstrap aggregating, multiple models are trained on different subsets of the same training data and then ensembled. Boosting models occurs when models are trained sequentially, allowing later models to correct the errors made by earlier models. The voting technique makes a final prediction by taking a majority vote of the predictions made by the various submodels. 
 
 Ensemble models can yield improved accuracy over their individual submodels by reducing overfitting. They may exhibit more robustness to changes in input data than their submodels. On the other hand, ensemble models can entail increased complexity, reduced ease of interpretability, and greater computational costs than their submodels individually.    
   
     
-### Ensembling first_model and second_model: ensemble_model
+### Ensembling first_model and second_model: preparing for and building the ensemble_model
 
 First, we defined the full file paths to our best saved models for first_model and second_model, and loaded them from saved. keras.
 
@@ -263,14 +254,11 @@ history = ensemble_model.fit(                           # Keras fit method train
 )
   
 ensemble_model.save(ensemble_filepath)                  # save model in specified directory
-
-
+  
   
 ## Transfer Learning   
 
-After pre-training, the model is applied to a new, specific dataset and classification task in a process known as transfer learning. The pre-trained model's weights, optimized during pre-training, become the starting point for training on a new, often smaller, dataset. The model learns the specifics of the new task while leveraging the general features it learned during pre-training. In our project, the smaller dataset consisted of the CT-Scan images with different types of chest cancer versus normal cells. The ResNet50 model (pre_trained
-
-The process of combining a pre-trained model with a custom CNN is called transfer learning.   
+After pre-training, a model can be applied to a new, specific dataset and classification task, a process called transfer learning. The pre-trained model's weights, optimized during pre-training, become the starting point for training on a new, often smaller, dataset. The model learns the specifics of the new task while leveraging the general features it learned during pre-training. In our project, the smaller dataset consisted of the CT-Scan images with different types of chest cancer versus normal cells. The ResNet50 model (pre_trained  
 
 
 
@@ -278,7 +266,7 @@ The process of combining a pre-trained model with a custom CNN is called transfe
 
 # Ensembling and Chaining Models
 
-We defined, compiled, and trained the ResNet50-based (first_model) and the base CNN model (second_model) individually before ensembling and chaining the two models. We wanted to see if a noticeable improvement in accuracy was possible by combining first_model and second_model over each of the submodels, and whether the method used to combine models (ensembling versus chaining) made a difference in accuracy scores.
+
 
 To prepare the ResNet50-based model and the base CNN model to be direct ensembled, we defined both first_model and second_model to produce output tensors of identical shape. This required specifying Dense layers for the models' final output layers. We also set the number of units in the final output layers as equal to the class_count value, to reflect the number of output classes in the data (4). We selected the Softmax activation functions for both models because it returns a probability distribution over the class_count classes. This ensured that the shape of the output tensors were (batch_size, class_count) or (None, 4).     
 
