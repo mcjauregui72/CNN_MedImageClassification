@@ -14,7 +14,7 @@ We defined, compiled, and trained two CNN submodels - one custom and one pre-tra
  c) ensembling the output of model_one and model_two (ensemble_model)  
  d) chaining model_one and model_two into model_four (transfer learning)  
 
-Concepts discussed:
+Concepts discussed:  
 Convolutional Neural Networks  
 Pretained models  
 Model Ensembling  
@@ -56,18 +56,18 @@ Pre-trained models often generalize better to new tasks because they start with 
 
 ### Submodel Compatibility Considerations
   
-To ensure our custom CNN and the pre-trained CNN would be compatible with each other for direct ensembling and transfer learning puposes, we took the following precautions and made adaptations to the original ResNet50 model. (Note we refer to model_one as our ResNet50-based model, rather than the original model itself.) 
+To ensure our custom CNN and the pre-trained CNN would be compatible with each other for direct ensembling and transfer learning puposes, we took the following precautions and made adaptations to the original ResNet50 model (Note we refer to model_one as our ResNet50-based model, rather than the original model itself): 
 
 1 Defined both models to produce output tensors of identical shape, (batch_size, class_count) or (None, 4), which entailed
-* Specifying Dense layers for the models' final output layers
-* Setting the number of units in the final output layersing as equal to the class_count value (4)
-* Selecting the Softmax activation functions for both models because it returns a probability distribution over three or more classes
+   * Specifying Dense layers for the models' final output layers
+   * Setting the number of units in the final output layersing as equal to the class_count value (4)
+   * Selecting the Softmax activation functions for both models because it returns a probability distribution over three or more classes
    
 2. Built both submodels with the Functional API because it supports more flexibility than the Sequential API. In particular, the Functional API
-* Affords more flexibility when combining pre-trained models with custom layers or sharing layers between models
-* Allows for explicit definition of the flow of data, enabl fine control over how layers connect and interact
-* Supports freezing layers and chaining models
-* Handles the complexities involved in ensembling models
+   * Affords more flexibility when combining pre-trained models with custom layers or sharing layers between models
+   * Allows for explicit definition of the flow of data, enabl fine control over how layers connect and interact
+   * Supports freezing layers and chaining models
+   * Handles the complexities involved in ensembling models
 
 3. Set the image_size to (224, 224) for first_model because ResNet50-based models expect images of that size. For purposes of consistency, we set the image_size to (224, 224) for second_model as well.
   
