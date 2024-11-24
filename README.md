@@ -21,7 +21,8 @@ Model Ensembling
 Transfer Learning/model chaining  
   
 The data for this project was obtained here: https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images  
-  
+
+The notebook for this project is Ensemble_Chain_ResNet_custom_manual_sparse.ipynb.
     
 ## Convolutional Neural Networks  
   
@@ -58,7 +59,7 @@ Pre-trained models often generalize better to new tasks because they start with 
   
 To ensure our custom CNN and the pre-trained CNN would be compatible with each other for direct ensembling and transfer learning puposes, we took the following precautions and made adaptations to the original ResNet50 model (Note we refer to model_one as our ResNet50-based model, rather than the original model itself): 
 
-1 Defined both models to produce output tensors of identical shape, (batch_size, class_count) or (None, 4), which entailed
+1. Defined both models to produce output tensors of identical shape, (batch_size, class_count) or (None, 4), which entailed
    * Specifying Dense layers for the models' final output layers
    * Setting the number of units in the final output layersing as equal to the class_count value (4)
    * Selecting the Softmax activation functions for both models because it returns a probability distribution over three or more classes
@@ -73,13 +74,19 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
   
 4. Set label_mode for the three datasets to "int" (integer) because all images in this study belong to one of four classes.
   
-5. Built our pre-trained CNN as a model based on the ResNet50-based model, but with modifications:
+5. Specified that data augmentation is applied before rescaling.
+  
+   * When using ResNet50 as a base model (pretrained on ImageNet), it is generally recommended to apply data augmentation before rescaling because:
+      a. Data augmentation techniques (e.g., RandomRotation, RandomZoom, RandomFlip) are designed to work on raw pixel values in the 0-255 range. If rescaling is done first, pixel values are converted to 0-1, which could interfere with how certain augmentations are applied.
+      b. Input Requirements for ResNet50: After augmentation, pixel values should be normalized (rescaled) to the 0-1 range before being passed to ResNet50, which expects input images with normalized pixel values. Thus, rescaling is necessarily the final preprocessing step.   
+  
+6. Built our pre-trained CNN as a model based on the ResNet50-based model, but with modifications:
    * Specified the img_size, channels, img_shape, and class_count to be identical in both models
    * Defined the same data augmentation layers as in our custom CNN and applied data augmentation to the input tensor
    * Applied the same rescaling defined in our custom CNN and specified the input tensor as the scaled inputs
-   * Because the original ResNet50 model is pretrained on over a million images in 1,000 classes in the ImageNet dataset, it needed to be modified to be capable of classifying our chest ct scans into four distinct classes. To do this we
+   * Because the original ResNet50 model is pretrained on over a million images in 1,000 classes in the ImageNet dataset, it needed to be modified to classify our chest ct scans into four distinct classes. To do this we
        
-      * Avoided outputting the 1,000-class predictions for which ResNet50 was originally trained by removing its top layer
+   * Avoided outputting the 1,000-class predictions for which ResNet50 was originally trained by removing the pre-trained model's top layer
        
         ResNet50, when its top layer is excluded, outputs a feature map with shape (7, 7, 2048). Adding custom layers on top of the ResNet50 base_model allowed us to 
         adapt the pretrained model to fit our specific needs (e.g., completing a four-class classification task, ensembling with the base CNN model, and chaining with the 
@@ -87,7 +94,7 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
         data. At the same time, the custom Dense(256) layer reduced the dimensionality of the ResNet50 base_model's output, making it more managable for the final output 
         layer to generate probabilities for each class.
             
-      * Avoided re-training ResNet50s pre-trained knowledge by "freezing" the ResNet50 layers, or making them untrainable
+   * Avoided re-training ResNet50s pre-trained knowledge by "freezing" the ResNet50 layers, or making them untrainable
             
          Freezing layers enabled the ResNet50 layers of first_model to retain the features it learned from pretraining on the much larger ImageNet data set. In other 
          words, freezing layers prevented the learned features from being overwritten. Common in transfer learning, layer freezing effectively turns a pretrained model 
@@ -100,7 +107,7 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
         The BatchNormalization(axis=-1) layer normalized the ResNet50 layers' output, improving performance and reducing overfitting 
 
 
-       
+     
     
   
   
