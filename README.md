@@ -57,19 +57,24 @@ Pre-trained models often generalize better to new tasks because they start with 
 
 ### Submodel Compatibility Considerations
   
-To ensure our custom CNN and the pre-trained CNN would be compatible with each other for direct ensembling and transfer learning puposes, we took the following precautions and made adaptations to the original ResNet50 model. Note we refer to model_one as our ResNet50-based model, rather than the original model itself. 
-
-1. Specified image_size as (224, 224) for first_model because ResNet50-based models expect images of that size. For purposes of consistency, we set the image_size to (224, 224) for second_model as well.
-   
-2. Specified that data augmentation is applied before rescaling because
-      a. Data augmentation techniques (e.g., RandomRotation, RandomZoom, RandomFlip) are designed to work on raw pixel values in the 0-255 range. If rescaling is done first, pixel values are converted to 0-1, which could interfere with how certain augmentations are applied.  
-    
-      b. ResNet50 requires and expects input images with normalized pixel values. After augmentation, pixel values should be normalized (rescaled) to the 0-1 range before being passed to ResNet50. Thus, rescaling is necessarily the final preprocessing step.
+To ensure our custom CNN and the pre-trained CNN would be compatible with each other for direct ensembling and transfer learning puposes, we took the following precautions and made adaptations to the original ResNet50 model. Note we refer to our ResNet50-based model as model_one.   
   
-3. Built our pre-trained CNN as a model based on the ResNet50-based model, but with these modifications:
-   * Specified the img_size, channels, img_shape, and class_count to be identical in both models
-   * Defined the same data augmentation layers as in our custom CNN and applied data augmentation to the input tensor
-   * Applied the same rescaling defined in our custom CNN and specified the input tensor as the scaled inputs
+1. Specified image_size as (224, 224) for first_model because ResNet50-based models expect images of that size. For purposes of consistency, we set the image_size to (224, 224) for second_model as well.
+     
+2. Specified channels, img_shape, and class_count to be identical to those in the custom CNN.
+   
+3. Defined the same data augmentation layers as in our custom CNN and applied the data augmentation to the input tensor.
+  
+4. Defined the same rescaling layers as in our custome CNN, and specified the input tensor as the scaled inputs.   
+   
+5. Specified that data augmentation is applied before rescaling because  
+   * Data augmentation techniques (e.g., RandomRotation, RandomZoom, RandomFlip) are designed to work on raw pixel values in the 0-255 range. If rescaling is done first, pixel values are converted to 0-1, which could interfere with how certain augmentations are applied.  
+    
+   * ResNet50 requires and expects input images with normalized pixel values. After augmentation, pixel values should be normalized (rescaled) to the 0-1 range before being passed to ResNet50. Thus, rescaling is necessarily the final preprocessing step.  
+  
+6. Built our pre-trained CNN based on the ResNet50-based model, but with these modifications:
+   * 
+   * 
    * Because the original ResNet50 model is pretrained on over a million images in 1,000 classes in the ImageNet dataset, it needed to be modified to classify our chest ct scans into four distinct classes. To do this we
        
    * Avoided outputting the 1,000-class predictions for which ResNet50 was originally trained by removing the pre-trained model's top layer
@@ -88,7 +93,7 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
          features. ResNet50 without its top layer (as we specified) outputs feature maps instead of classification predictions. The feature maps become the inputs for the 
          subsequent custom layers, which will ultimately result in the classification predictions.
 
-4.    
+7.    
 1. Defined both models to produce output tensors of identical shape, (batch_size, class_count) or (None, 4), which entailed
    * Specifying Dense layers for the models' final output layers
    * Setting the number of units in the final output layersing as equal to the class_count value (4)
