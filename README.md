@@ -57,30 +57,16 @@ Pre-trained models often generalize better to new tasks because they start with 
 
 ### Submodel Compatibility Considerations
   
-To ensure our custom CNN and the pre-trained CNN would be compatible with each other for direct ensembling and transfer learning puposes, we took the following precautions and made adaptations to the original ResNet50 model (Note we refer to model_one as our ResNet50-based model, rather than the original model itself): 
+To ensure our custom CNN and the pre-trained CNN would be compatible with each other for direct ensembling and transfer learning puposes, we took the following precautions and made adaptations to the original ResNet50 model. Note we refer to model_one as our ResNet50-based model, rather than the original model itself. 
 
-1. Defined both models to produce output tensors of identical shape, (batch_size, class_count) or (None, 4), which entailed
-   * Specifying Dense layers for the models' final output layers
-   * Setting the number of units in the final output layersing as equal to the class_count value (4)
-   * Selecting the Softmax activation functions for both models because it returns a probability distribution over three or more classes
+1. Specified image_size as (224, 224) for first_model because ResNet50-based models expect images of that size. For purposes of consistency, we set the image_size to (224, 224) for second_model as well.
    
-2. Built both submodels with the Functional API because it supports more flexibility than the Sequential API. In particular, the Functional API
-   * Affords more flexibility when combining pre-trained models with custom layers or sharing layers between models
-   * Allows for explicit definition of the flow of data, enabl fine control over how layers connect and interact
-   * Supports freezing layers and chaining models
-   * Handles the complexities involved in ensembling models
-
-3. Set the image_size to (224, 224) for first_model because ResNet50-based models expect images of that size. For purposes of consistency, we set the image_size to (224, 224) for second_model as well.
-  
-4. Set label_mode for the three datasets to "int" (integer) because all images in this study belong to one of four classes.
-  
-5. Specified that data augmentation is applied before rescaling.
-  
-   * When using ResNet50 as a base model (pretrained on ImageNet), it is generally recommended to apply data augmentation before rescaling because:  
+2. Specified that data augmentation is applied before rescaling because
       a. Data augmentation techniques (e.g., RandomRotation, RandomZoom, RandomFlip) are designed to work on raw pixel values in the 0-255 range. If rescaling is done first, pixel values are converted to 0-1, which could interfere with how certain augmentations are applied.  
-      b. Input Requirements for ResNet50: After augmentation, pixel values should be normalized (rescaled) to the 0-1 range before being passed to ResNet50, which expects input images with normalized pixel values. Thus, rescaling is necessarily the final preprocessing step.   
+    
+      b. ResNet50 requires and expects input images with normalized pixel values. After augmentation, pixel values should be normalized (rescaled) to the 0-1 range before being passed to ResNet50. Thus, rescaling is necessarily the final preprocessing step.
   
-6. Built our pre-trained CNN as a model based on the ResNet50-based model, but with modifications:
+3. Built our pre-trained CNN as a model based on the ResNet50-based model, but with these modifications:
    * Specified the img_size, channels, img_shape, and class_count to be identical in both models
    * Defined the same data augmentation layers as in our custom CNN and applied data augmentation to the input tensor
    * Applied the same rescaling defined in our custom CNN and specified the input tensor as the scaled inputs
@@ -101,6 +87,26 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
          into a feature extractor. The custom layers we added to the "feature extractor" then produced the four-class classification, drawing from the ResNet50's learned 
          features. ResNet50 without its top layer (as we specified) outputs feature maps instead of classification predictions. The feature maps become the inputs for the 
          subsequent custom layers, which will ultimately result in the classification predictions.
+
+4.    
+1. Defined both models to produce output tensors of identical shape, (batch_size, class_count) or (None, 4), which entailed
+   * Specifying Dense layers for the models' final output layers
+   * Setting the number of units in the final output layersing as equal to the class_count value (4)
+   * Selecting the Softmax activation functions for both models because it returns a probability distribution over three or more classes
+   
+2. Built both submodels with the Functional API because it supports more flexibility than the Sequential API. In particular, the Functional API
+   * Affords more flexibility when combining pre-trained models with custom layers or sharing layers between models
+   * Allows for explicit definition of the flow of data, enabl fine control over how layers connect and interact
+   * Supports freezing layers and chaining models
+   * Handles the complexities involved in ensembling models
+
+
+  
+4. Set label_mode for the three datasets to "int" (integer) because all images in this study belong to one of four classes.
+  
+   
+    
+
             
       * Added a BatchNormalization layer, a 0.3 Dropout layer, and a Dense output layer designed to produce predictions for a four-class problem
            
