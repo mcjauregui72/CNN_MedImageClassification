@@ -76,8 +76,8 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
   
 5. Specified that data augmentation is applied before rescaling.
   
-   * When using ResNet50 as a base model (pretrained on ImageNet), it is generally recommended to apply data augmentation before rescaling because:
-      a. Data augmentation techniques (e.g., RandomRotation, RandomZoom, RandomFlip) are designed to work on raw pixel values in the 0-255 range. If rescaling is done first, pixel values are converted to 0-1, which could interfere with how certain augmentations are applied.
+   * When using ResNet50 as a base model (pretrained on ImageNet), it is generally recommended to apply data augmentation before rescaling because:  
+      a. Data augmentation techniques (e.g., RandomRotation, RandomZoom, RandomFlip) are designed to work on raw pixel values in the 0-255 range. If rescaling is done first, pixel values are converted to 0-1, which could interfere with how certain augmentations are applied.  
       b. Input Requirements for ResNet50: After augmentation, pixel values should be normalized (rescaled) to the 0-1 range before being passed to ResNet50, which expects input images with normalized pixel values. Thus, rescaling is necessarily the final preprocessing step.   
   
 6. Built our pre-trained CNN as a model based on the ResNet50-based model, but with modifications:
