@@ -7,7 +7,7 @@ Can we train a custom convolutional neural network (CNN) model from scratch to c
   
 What happens if we add to our model a pre-trained CNN model by employing transfer learning and model ensembling? Will we see improved accuracy scores with either of these methods?
 
-We defined, compiled, and trained two CNN submodels - one custom and one pre-trained - individually before ensembling and chaining them. We looked for a noticeable improvement in accuracy between the ensembled model and/or the chained model, over each of the two submodels.      
+We defined, compiled, and trained two CNN submodels - one custom and one pre-trained - individually before ensembling and chaining them. We looked for a noticeable improvement in accuracy between the ensembled model and/or the chained model, over each of the two submodels.  
   
  a) the pre-trained ResNet50 model (model_one)   
  b) our custom CNN (model_two)  
@@ -67,19 +67,43 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
   
 4. Defined the same rescaling layers as in our custome CNN, and specified the input tensor as the scaled inputs.   
    
-5. Specified that data augmentation is applied before rescaling because  
+5. Specified that data augmentation get applied before rescaling because  
    * Data augmentation techniques (e.g., RandomRotation, RandomZoom, RandomFlip) are designed to work on raw pixel values in the 0-255 range. If rescaling is done first, pixel values are converted to 0-1, which could interfere with how certain augmentations are applied.  
     
    * ResNet50 requires and expects input images with normalized pixel values. After augmentation, pixel values should be normalized (rescaled) to the 0-1 range before being passed to ResNet50. Thus, rescaling is necessarily the final preprocessing step.  
   
-6. Built our pre-trained CNN based on the ResNet50-based model, but with these modifications:
-   * 
-   * 
-   * Because the original ResNet50 model is pretrained on over a million images in 1,000 classes in the ImageNet dataset, it needed to be modified to classify our chest ct scans into four distinct classes. To do this we
-       
-   * Avoided outputting the 1,000-class predictions for which ResNet50 was originally trained by removing the pre-trained model's top layer
-       
-        ResNet50, when its top layer is excluded, outputs a feature map with shape (7, 7, 2048). Adding custom layers on top of the ResNet50 base_model allowed us to 
+6. Because the original ResNet50 model was pretrained to classify over a million ImageNet images into 1,000 classes, we needed to freeze it's top layer. Specifying include_top = False effectively removed this original classification layer so that we could replace it with one suited for our own task.  
+
+7. Because ResNet50 without its top layer would output a feature map with shape (7, 7, 2048), 
+
+The pooling='max' layer in your ResNet50 base model is critical for controlling the shape of the output tensor and ensuring compatibility with the subsequent Dense layers in your model.
+
+The ResNet50 model outputs a 4D tensor with shape (batch_size, height, width, channels) after the convolutional layers when include_top=False and no pooling is applied. This tensor is unsuitable for feeding directly into fully connected Dense layers, which require a 2D input of shape (batch_size, features).
+
+By setting pooling='max', the model applies global max pooling to reduce the spatial dimensions (height, width) into a single value for each channel. This results in a tensor with shape (batch_size, channels), which can be directly processed by the Dense layers.
+
+Without pooling='max', you'd need to explicitly add a Flatten layer to convert the 4D tensor to 2D. Using global pooling (pooling='max' or pooling='avg') is often preferred because it achieves the same goal while reducing the number of parameters and computations.
+
+What would happen if pooling='max' were omitted?
+Tensor Shape Mismatch:
+
+Without pooling='max', the output of the ResNet50 base model would remain a 4D tensor with shape (batch_size, height, width, channels).
+Passing this directly to the subsequent Dense layers would result in a shape mismatch error, as Dense layers expect a 2D input tensor.
+Additional Flattening Step Required:
+
+To make the output compatible with Dense layers, you'd need to explicitly add a Flatten layer after the base model:
+python
+Copy code
+x = Flatten()(base_model.output)
+While this resolves the shape issue, it results in a much larger input size for the Dense layers, which could increase the risk of overfitting and computational complexity.
+Loss of Efficiency:
+
+Flattening preserves all spatial information, leading to a high-dimensional feature vector. Global pooling, on the other hand, reduces the dimensionality by summarizing the features spatially, which is computationally more efficient and often yields better generalization performance.
+
+
+
+
+8. . Adding custom layers on top of the ResNet50 base_model allowed us to 
         adapt the pretrained model to fit our specific needs (e.g., completing a four-class classification task, ensembling with the base CNN model, and chaining with the 
         base CNN model). Furthermore, the added BatchNormalization and Dropout layers assisted with regularizing the model, or improving its generalization on unseen 
         data. At the same time, the custom Dense(256) layer reduced the dimensionality of the ResNet50 base_model's output, making it more managable for the final output 
