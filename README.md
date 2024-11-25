@@ -59,13 +59,17 @@ Pre-trained models often generalize better to new tasks because they start with 
   
 To ensure our custom CNN and the pre-trained CNN would be compatible with each other for direct ensembling and transfer learning puposes, we took the following precautions and made adaptations to the original ResNet50 model. Note we refer to our ResNet50-based model as first_model.   
   
-1.
+1. We used the tf.keras.preprocessing.image_dataset_from_directory method to generate our training_set, testing_set, and validation_set.  
   
-2. Specified image_size as (224, 224) for first_model because ResNet50-based models expect images of that size. For purposes of consistency, we set the image_size to (224, 224) for second_model as well.
+   * This method automatically labeled all images based on their subdirectory names. 
+  
+   * It also treated each each subdirectory as a class, assigning labels as integers starting from 0.  
+    
+2. Specified image_size as (224, 224) for first_model because ResNet50-based models expect images of that size. For purposes of consistency, we set the image_size to (224, 224) for second_model as well.  
      
-3. Specified channels, img_shape, and class_count to be identical to those in the custom CNN.
+3. Specified channels, img_shape, and class_count to be identical to those in the custom CNN.  
    
-4. Defined the same data augmentation layers as in our custom CNN and applied the data augmentation to the input tensor.
+4. Defined the same data augmentation layers as in our custom CNN and applied the data augmentation to the input tensor.  
   
 5. Defined the same rescaling layers as in our custome CNN, and specified the input tensor as the scaled inputs.   
    
@@ -74,63 +78,46 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
     
    * ResNet50 requires and expects input images with normalized pixel values. After augmentation, pixel values should be normalized (rescaled) to the 0-1 range before being passed to ResNet50. Thus, rescaling is necessarily the final preprocessing step.  
   
-7. Because the original ResNet50 model was pretrained to classify over a million ImageNet images into 1,000 classes, it outputs feature maps when its top layer is removed. Specifying include_top = False effectively removed this layer so we could replace it with one suited for our own task.
+7. Because the original ResNet50 model was pretrained to classify over a million ImageNet images into 1,000 classes, it outputs feature maps when its top layer is removed. Specifying include_top = False effectively removed this layer so we could replace it with one suited for our own task.  
 
-8. We added a pooling='max' layer to the ResNet50-based model to control the shape of the output tensor and ensure compatibility with the subsequent layers that needed to be added.
-   * The ResNet50 model outputs a 4D tensor after its convolutional layers when include_top=False and no pooling is applied. This tensor could not be fed directly into fully connected Dense layers, which require a 2D input.
+8. We added a pooling='max' layer to the ResNet50-based model to control the shape of the output tensor and ensure compatibility with the subsequent layers that needed to be added.  
+   * The ResNet50 model outputs a 4D tensor after its convolutional layers when include_top=False and no pooling is applied. This tensor could not be fed directly into fully connected Dense layers, which require a 2D input.  
   
-   * Setting pooling='max' applied global max pooling to reduce the spatial dimensions into a single value for each channel, producing a tensor compatible with Dense layers.
+   * Setting pooling='max' applied global max pooling to reduce the spatial dimensions into a single value for each channel, producing a tensor compatible with Dense layers.  
   
-   * Without pooling='max', we would have needed to explicitly add a Flatten layer to convert the 4D tensor to 2D in order to avoid a shape mismatch error. Though a Flatten layer would have resolved the shape issue, it would generate a larger input size for the Dense layers, increasing the risk of overfitting.
+   * Without pooling='max', we would have needed to explicitly add a Flatten layer to convert the 4D tensor to 2D in order to avoid a shape mismatch error. Though a Flatten layer would have resolved the shape issue, it would generate a larger input size for the Dense layers, increasing the risk of overfitting.  
      
-   * Unlike Flattening, which preserves all spatial information to return a high-dimensional feature vector, global pooling reduces dimensionality. 
+   * Unlike Flattening, which preserves all spatial information to return a high-dimensional feature vector, global pooling reduces dimensionality.   
   
-9. With for layer in base_model.layers: layer.trainable = False, we avoided re-training ResNet50s pre-trained knowledge by "freezing" its layers.
+9. With for layer in base_model.layers: layer.trainable = False, we avoided re-training ResNet50s pre-trained knowledge by "freezing" its layers.  
    * Making these layers untrainable preserved the features ResNet50 learned during pre-training, keeping them from becoming over-written during training.    
             
-    * Layer freezing effectively turned ResNet50 into a feature extractor.
+    * Layer freezing effectively turned ResNet50 into a feature extractor.  
     
-10. We built both submodels with the Functional API because it supports more flexibility than the Sequential API. In particular, the Functional API
-   * Affords more flexibility when combining pre-trained models with custom layers or sharing layers between models
+10. We built both submodels with the Functional API because it supports more flexibility than the Sequential API. In particular, the Functional API  
+   * Affords more flexibility when combining pre-trained models with custom layers or sharing layers between models  
      
-   * Allows for explicit definition of the flow of data, enabl fine control over how layers connect and interact
+   * Allows for explicit definition of the flow of data, enabl fine control over how layers connect and interact  
      
-   * Supports freezing layers and chaining models
+   * Supports freezing layers and chaining models  
      
-   * Handles the complexities involved in ensembling models
+   * Handles the complexities involved in ensembling models  
      
-11. We added custom layers on top of the ResNet50-based base to allow the final model to complete our four-class classification task and to be ensembled and chained with the other submodel.
-   * Both the BatchNormalization and Dropout layers helped improve generalization on unseen data.
+11. We added custom layers on top of the ResNet50-based base to allow the final model to complete our four-class classification task and to be ensembled and chained with the other submodel.  
+   * Both the BatchNormalization and Dropout layers helped improve generalization on unseen data.  
        
-   * The custom Dense layer reduced dimensionality associated with the ResNet50 base's output, making it probability generating more managable. 
+   * A Dense(256, activation='relu) layer to learn more complex patterns from the high-level features provided by ResNet50.
+   ** These more complex patterns became relevant to our classification task
+   ** The ReLU activation function supported the custom layers to model more intricate relationships between features
   
-12. Defined the Dense output layer with a class_count of four and an activation of softmax, which can return a probability distribution over three or more classes. 
-  
+12. We defined the Dense output layer with a class_count of four and an activation of softmax, which can return a probability distribution over three or more classes.
+    
+13. We compiled first_model with optimizer=optimizer, loss='sparse_categorical_crossentropy', and metrics=['accuracy'].
 
-   
-
-
-
-  
-4. Set label_mode for the three datasets to "int" (integer) because all images in this study belong to one of four classes.
-  
-   
+14. We trained first_model with EarlyStopping and ModelCheckpoint callbacks.  
     
 
-            
-      * Added a BatchNormalization layer, a 0.3 Dropout layer, and a Dense output layer designed to produce predictions for a four-class problem
-           
-        The BatchNormalization(axis=-1) layer normalized the ResNet50 layers' output, improving performance and reducing overfitting 
-
-
-     
-    
-  
-  
-
-b)    
-
-c) Dense(256, activation='relu) layer to learn more complex patterns from the high-level features provided by ResNet50. These more complex patterns will became relevant to the classification task at hand, while the ReLU activation function supported the custom layers to model more intricate relationships between features    
+c)    
 
 d) Dropout(0.3) to prevent overfitting by forcing the model to learn more robust features and preventing it from becoming too reliant on specific neurons    
 
