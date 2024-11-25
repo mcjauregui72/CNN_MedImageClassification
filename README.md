@@ -95,7 +95,7 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
     * Layer freezing effectively turned ResNet50 into a feature extractor.  
     
 10. We built both submodels with the Functional API because it supports more flexibility than the Sequential API. In particular, the Functional API  
-   * Affords more flexibility when combining pre-trained models with custom layers or sharing layers between models  
+   * Affords more flexibility when combining pre-trained models with custom layers or sharing layers between models 
      
    * Allows for explicit definition of the flow of data, enabl fine control over how layers connect and interact  
      
@@ -106,9 +106,9 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
 11. We added custom layers on top of the ResNet50-based base to allow the final model to complete our four-class classification task and to be ensembled and chained with the other submodel.  
    * Both the BatchNormalization and Dropout layers helped improve generalization on unseen data.  
        
-   * A Dense(256, activation='relu) layer to learn more complex patterns from the high-level features provided by ResNet50.
-   ** These more complex patterns became relevant to our classification task
-   ** The ReLU activation function supported the custom layers to model more intricate relationships between features
+   * A Dense(256, activation='relu) layer to learn more complex patterns from the high-level features provided by ResNet50
+      * These more complex patterns became relevant to our classification task
+      * The ReLU activation function supported the custom layers to model more intricate relationships between features
   
 12. We defined the Dense output layer with a class_count of four and an activation of softmax, which can return a probability distribution over three or more classes.
     
