@@ -160,7 +160,15 @@ The considerations we had to take into account when chaining model_one and model
   
 1. Data augmentation and rescaling is necessary only in the first of two models, when using the Functional API.
    
-2.  
+2. Define but don't compile and train the submodels contributing to the chained model until the chained model is defined.
+   
+3. We removed the final, dense layer from first_model because we didn't want it to generate a vector representing class probabilities. We wanted to use first_model only as a feature extractor, allowing second_model to generate the class probabilities.
+    * We defined a new output layer to serve as feature extraction, mod_first_model_output = x
+    * Thus, the final output of our modified first_model is the result of the Dropout layer, the layer immediately preceding the final output layer
+    * We saved this modified version of first_model as mod_first_model
+      
+4. We defined  
+      
 
 
 
