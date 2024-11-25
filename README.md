@@ -99,9 +99,9 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
      
 11. Added custom layers on top of the ResNet50-based base to allow the final model to complete our four-class classification task and to be ensembled and chained with the other submodel.
     * Both the BatchNormalization and Dropout layers helped improve generalization on unseen data.  
-    * The Dense(256, activation='relu) layer learned more complex patterns from the high-level features provided by ResNet50
+    * The Dense(256, activation='relu') layer learned more complex patterns from the high-level features provided by ResNet50
     * These more complex patterns became relevant to our classification task
-    * The ReLU activation function supported the custom layers to model more intricate relationships between features
+    * The relu activation function supported the custom layers to model more intricate relationships between features
     * Dropout(0.25) was intended to prevent overfitting by forcing the model to learn more robust features and preventing it from becoming too reliant on specific neurons 
   
 12. Defined identical output layers in each submodel:
@@ -109,22 +109,13 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
     * Each value in the probability distribution corresponded to the predicted probability that the input image belonged to a given class
     * We chose the Softmax activation because it can return a probability distribution over three or more classes
     
-14. Compiled both submodels with optimizer=optimizer, loss='sparse_categorical_crossentropy', and metrics=['accuracy'].
+14. Compiled both submodels with optimizer='adam', loss='sparse_categorical_crossentropy', and metrics=['accuracy']. We chose the 'sparse_categorical_crossentropy' function because our dataset includes integer labels and it works for most multi-classification tasks.  
 
 15. Trained both submodels with identical EarlyStopping and ModelCheckpoint callbacks.  
    
   
-
-
-
-
-
-
-
-
-
   
-### Ensembling Models
+### Model Ensembling  
   
 Ensembling models entails combining the individual predictions of multiple models on the same dataset, in an attempt to make better predictions on that dataset. Ensemble models can improve upon the predictive performance of individual models. If different models make different types of errors, we may be able to reduce the overall error rate by combining their predictions. 
 
@@ -139,26 +130,42 @@ We took the following steps to prepare for and build the ensemble_mode:
 
 1. Defined the full file paths to our best saved first_model and second_model, and loaded them from saved. keras.
    
-3. Extracted labels from the TensorFlow datasets (training_set, testing_set, validation_set) we had created by using the tf.keras.preprocessing.image_dataset_from_directory method. Ensemble models need labels in order to compute loss (by comparing predictions to true lables) and update models during training. 
+2. Extracted labels from the TensorFlow datasets (training_set, testing_set, validation_set) we had created by using the tf.keras.preprocessing.image_dataset_from_directory method. Ensemble models need labels in order to compute loss (by comparing predictions to true lables) and update models during training. 
   
-3. Generated submodel predictions for the training and validation datasets. 
+3. Generated submodel predictions for the training and validation datasets with shape (None, 4):  
+    * preds_first_model_train = first_model.predict(training_set)
+    * preds_second_model_train = second_model.predict(training_set)
+    * preds_first_model_val = first_model.predict(validation_set)
+    * preds_second_model_val = second_model.predict(validation_set)
   
-4. define EarlyStopping and ModelCheckpoint callbacks and a filepath to save the best ensemble_model. 
+4. Defined EarlyStopping and ModelCheckpoint callbacks and a filepath to save the best ensemble_model. 
   
-5. Built and trained the ensemble_model to process the combined predictions. The ensemble model's input shape reflected how outputs would get combined, two predictions per class, with an output shape of (None, 4).
-
-Results:
-
-    
+5. Built, compiled, and trained the ensemble_model, in the same manner as with the two submodels, to process the combined predictions.   
+    * Defined ensemble_input_train as the simple average of the first_model's predictions on the training_set and the second_model's predictions on the training_set.
+    * Defined ensemble_input_val as the simple average of the first_model's predictions on the validation_set and the second_model's predictions on the validation set.
+    * Defined ensemble_input as the input layer for the ensemble_model, Input(shape=(4,))
+    * Added a Dense layer as the output layer, final_output = Dense(4, activation='softmax')(ensemble_input)
+    * Defined ensemble_model as Model(inputs=ensemble_input, outputs = final_output)
+    * Compiled ensemble_model with optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy']
+    * In training the ensemble_model, we used ensemble_input_train as our x and y_train - the true labels from our training_set as our true labels corresponding with the averaged training_set predictions.
+      
+      
 ## Transfer Learning   
 
-An alternative to ensembling two models is chaining them. After pre-training, a model can be applied to a new, specific dataset and classification task, a process called transfer learning. The pre-trained model's weights, optimized during pre-training, become the starting point for training on a new, often smaller, dataset. The model learns the specifics of the new task while leveraging the general features it learned during pre-training. In our project, the smaller dataset consisted of the CT-Scan images with different types of chest cancer versus normal cells. The ResNet50 model (pre_trained  
+An alternative to ensembling two models is chaining them. After pre-training, a model can be applied to a new, specific dataset and classification task, in a process called transfer learning. The pre-trained model's weights, optimized during pre-training, become the starting point for training on a new, often smaller, dataset. The model learns the specifics of the new task while leveraging the general features it learned during pre-training. In our project, the smaller dataset consisted of the CT-Scan images with different types of chest cancer versus normal cells. 
+  
+  
+# Chaining Models  
+The considerations we had to take into account when chaining model_one and model_two included:
+  
+1. Data augmentation and rescaling is necessary only in the first of two models, when using the Functional API.
+   
+2.  
 
 
 
 
 
-# Ensembling and Chaining Models
 
 
 ### Building first_model from pretrained ResNet50
