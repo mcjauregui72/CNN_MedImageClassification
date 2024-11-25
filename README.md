@@ -92,17 +92,16 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
    * Unlike Flattening, which preserves all spatial information to return a high-dimensional feature vector, global pooling reduces dimensionality.   
   
 9. With for layer in base_model.layers: layer.trainable = False, we avoided re-training ResNet50s pre-trained knowledge by "freezing" its layers.  
-   * Making these layers untrainable preserved the features ResNet50 learned during pre-training, keeping them from becoming over-written during training.    
-            
+   * Making these layers untrainable preserved the features ResNet50 learned during pre-training, keeping them from becoming over-written during training.  
    * Layer freezing effectively turned ResNet50 into a feature extractor.  
     
-10. We built both submodels with the Functional API because it supports more flexibility than the Sequential API. In particular, the Functional API  
+10. We built both submodels with the Functional API because it supports more flexibility than the Sequential API. In particular, the Functional API
    * Affords more flexibility when combining pre-trained models with custom layers or sharing layers between models 
    * Allows for explicit definition of the flow of data, enabl fine control over how layers connect and interact  
    * Supports freezing layers and chaining models  
    * Handles the complexities involved in ensembling models  
      
-11. We added custom layers on top of the ResNet50-based base to allow the final model to complete our four-class classification task and to be ensembled and chained with the other submodel.  
+11. We added custom layers on top of the ResNet50-based base to allow the final model to complete our four-class classification task and to be ensembled and chained with the other submodel.
    * Both the BatchNormalization and Dropout layers helped improve generalization on unseen data.  
    * The Dense(256, activation='relu) layer learned more complex patterns from the high-level features provided by ResNet50
    * These more complex patterns became relevant to our classification task
