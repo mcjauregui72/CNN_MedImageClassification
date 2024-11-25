@@ -59,74 +59,60 @@ Pre-trained models often generalize better to new tasks because they start with 
   
 To ensure our custom CNN and the pre-trained CNN would be compatible with each other for direct ensembling and transfer learning puposes, we took the following precautions and made adaptations to the original ResNet50 model. Note we refer to our ResNet50-based model as first_model.   
   
-1. We used the tf.keras.preprocessing.image_dataset_from_directory method to generate our training_set, testing_set, and validation_set.  
-  
+1. Used the tf.keras.preprocessing.image_dataset_from_directory method to generate our training_set, testing_set, and validation_set.  
    * This method automatically labeled all images based on their subdirectory names. 
-  
    * It also treated each each subdirectory as a class, assigning labels as integers starting from 0.  
     
 2. Specified image_size as (224, 224) for first_model because ResNet50-based models expect images of that size. For purposes of consistency, we set the image_size to (224, 224) for second_model as well.  
      
-3. Specified channels, img_shape, and class_count to be identical to those in the custom CNN.  
+3. Specified channels, img_shape, and class_count to be identical to those in the custom CNN
    
-4. Defined the same data augmentation layers as in our custom CNN and applied the data augmentation to the input tensor.  
+4. Defined the same data augmentation layers as in our custom CNN and applied the data augmentation to the input tensor
   
-5. Defined the same rescaling layers as in our custome CNN, and specified the input tensor as the scaled inputs.   
+5. Defined the same rescaling layers as in our custome CNN, and specified the input tensor as the scaled inputs
    
-6. Specified that data augmentation get applied before rescaling because  
-   * Data augmentation techniques (e.g., RandomRotation, RandomZoom, RandomFlip) are designed to work on raw pixel values in the 0-255 range.
-   
-   * If rescaling is done first, pixel values are converted to 0-1, which could interfere with how certain augmentations are applied.  
-    
-   * ResNet50 requires and expects input images with normalized pixel values. After augmentation, pixel values should be normalized (rescaled) to the 0-1 range before being passed to ResNet50. Thus, rescaling is necessarily the final preprocessing step.  
+6. Applied data augmentation and rescaling in both submodels, early in the model pipeline
+    * When ensembling two models, it is appropriate to apply data augmentation and rescaling in both submodels.
+    * In particular, data augmentation should come before rescaling, right after defining the model's input layer.
+    * Data augmentation techniques (e.g., RandomRotation, RandomZoom, RandomFlip) are designed to work on raw pixel values in the 0-255 range.
+    * If rescaling is done first, pixel values are converted to 0-1, which could interfere with how certain augmentations are applied.
+    * Because the ResNet50-based base_model component of our first_model expected inputs' pixel values to be normalized to a range between 0 and 1, we rescaled the augmented input data before passing it to the ResNet50 layers. 
   
-7. Because the original ResNet50 model was pretrained to classify over a million ImageNet images into 1,000 classes, it outputs feature maps when its top layer is removed. Specifying include_top = False effectively removed this layer so we could replace it with one suited for our own task.  
+7. Specified include_top = False to effectively removed ResNet50's top layer so we could replace it with one suited for our own task.  Because the original ResNet50 model was pretrained to classify over a million ImageNet images into 1,000 classes, it outputs feature maps when its top layer is removed. 
 
-8. We added a pooling='max' layer to the ResNet50-based model to control the shape of the output tensor and ensure compatibility with the subsequent layers that needed to be added.  
+8. Added a pooling='max' layer to the ResNet50-based model to control the shape of the output tensor and ensure compatibility with the subsequent layers that needed to be added.  
    * The ResNet50 model outputs a 4D tensor after its convolutional layers when include_top=False and no pooling is applied. This tensor could not be fed directly into fully connected Dense layers, which require a 2D input.  
-  
    * Setting pooling='max' applied global max pooling to reduce the spatial dimensions into a single value for each channel, producing a tensor compatible with Dense layers.  
-  
    * Without pooling='max', we would have needed to explicitly add a Flatten layer to convert the 4D tensor to 2D in order to avoid a shape mismatch error. Though a Flatten layer would have resolved the shape issue, it would generate a larger input size for the Dense layers, increasing the risk of overfitting.  
-     
    * Unlike Flattening, which preserves all spatial information to return a high-dimensional feature vector, global pooling reduces dimensionality.   
   
-9. With for layer in base_model.layers: layer.trainable = False, we avoided re-training ResNet50s pre-trained knowledge by "freezing" its layers.  
+11. Specified for layer in base_model.layers: layer.trainable = False, to avoid re-training ResNet50's pre-trained knowledge during model training.  
    * Making these layers untrainable preserved the features ResNet50 learned during pre-training, keeping them from becoming over-written during training.  
    * Layer freezing effectively turned ResNet50 into a feature extractor.  
     
-10. We built both submodels with the Functional API because it supports more flexibility than the Sequential API. In particular, the Functional API
+12. Built both submodels with the Functional API because it supports more flexibility than the Sequential API. In particular, the Functional API
     * Affords more flexibility when combining pre-trained models with custom layers or sharing layers between models 
     * Allows for explicit definition of the flow of data, enabl fine control over how layers connect and interact  
     * Supports freezing layers and chaining models  
     * Handles the complexities involved in ensembling models  
      
-11. We added custom layers on top of the ResNet50-based base to allow the final model to complete our four-class classification task and to be ensembled and chained with the other submodel.
+12. Added custom layers on top of the ResNet50-based base to allow the final model to complete our four-class classification task and to be ensembled and chained with the other submodel.
     * Both the BatchNormalization and Dropout layers helped improve generalization on unseen data.  
     * The Dense(256, activation='relu) layer learned more complex patterns from the high-level features provided by ResNet50
     * These more complex patterns became relevant to our classification task
     * The ReLU activation function supported the custom layers to model more intricate relationships between features
     * Dropout(0.3) was intended to prevent overfitting by forcing the model to learn more robust features and preventing it from becoming too reliant on specific neurons 
   
-12. We defined the output layer Dense(class_count, activation = 'softmax') to output a probability distribution across the classes (given by class_count).
+13. Defined the output layer Dense(class_count, activation = 'softmax') to output a probability distribution across the classes (given by class_count).
     * Each value in the probability distribution corresponded to the predicted probability that the input image belonged to a given class
     * We chose the Softmax activation because it can return a probability distribution over three or more classes
     
-14. We compiled first_model with optimizer=optimizer, loss='sparse_categorical_crossentropy', and metrics=['accuracy'].
+14. Compiled both submodels with optimizer=optimizer, loss='sparse_categorical_crossentropy', and metrics=['accuracy'].
 
-15. We trained first_model with EarlyStopping and ModelCheckpoint callbacks.  
+15. Trained both submodels with EarlyStopping and ModelCheckpoint callbacks.  
    
   
-### first_model, the ResNet50-based model  
-  
-  
-Results:
-  
-  
-### second_model, the custom CNN  
-  
 
-Results:
 
 
 
