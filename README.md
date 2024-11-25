@@ -74,7 +74,9 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
 5. Defined the same rescaling layers as in our custome CNN, and specified the input tensor as the scaled inputs.   
    
 6. Specified that data augmentation get applied before rescaling because  
-   * Data augmentation techniques (e.g., RandomRotation, RandomZoom, RandomFlip) are designed to work on raw pixel values in the 0-255 range. If rescaling is done first, pixel values are converted to 0-1, which could interfere with how certain augmentations are applied.  
+   * Data augmentation techniques (e.g., RandomRotation, RandomZoom, RandomFlip) are designed to work on raw pixel values in the 0-255 range.
+   
+   * If rescaling is done first, pixel values are converted to 0-1, which could interfere with how certain augmentations are applied.  
     
    * ResNet50 requires and expects input images with normalized pixel values. After augmentation, pixel values should be normalized (rescaled) to the 0-1 range before being passed to ResNet50. Thus, rescaling is necessarily the final preprocessing step.  
   
@@ -106,25 +108,21 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
 11. We added custom layers on top of the ResNet50-based base to allow the final model to complete our four-class classification task and to be ensembled and chained with the other submodel.  
    * Both the BatchNormalization and Dropout layers helped improve generalization on unseen data.  
        
-   * A Dense(256, activation='relu) layer to learn more complex patterns from the high-level features provided by ResNet50
+   * The Dense(256, activation='relu) layer learned more complex patterns from the high-level features provided by ResNet50
       * These more complex patterns became relevant to our classification task
+        
       * The ReLU activation function supported the custom layers to model more intricate relationships between features
+    
+  * Dropout(0.3) was intended to prevent overfitting by forcing the model to learn more robust features and preventing it from becoming too reliant on specific neurons 
   
-12. We defined the Dense output layer with a class_count of four and an activation of softmax, which can return a probability distribution over three or more classes.
+12. We defined the output layer Dense(class_count, activation = 'softmax') to output a probability distribution across the classes (given by class_count).
+   * Each value in the probability distribution corresponded to the predicted probability that the input image belonged to a given class
+   * We chose the Softmax activation because it can return a probability distribution over three or more classes
     
-13. We compiled first_model with optimizer=optimizer, loss='sparse_categorical_crossentropy', and metrics=['accuracy'].
+14. We compiled first_model with optimizer=optimizer, loss='sparse_categorical_crossentropy', and metrics=['accuracy'].
 
-14. We trained first_model with EarlyStopping and ModelCheckpoint callbacks.  
-    
-
-c)    
-
-d) Dropout(0.3) to prevent overfitting by forcing the model to learn more robust features and preventing it from becoming too reliant on specific neurons    
-
-e) Dense(class_count, activation = 'softmax') to output a probability distribution across the classes (whose number is given by class_count). Each value in the probability distribution corresponds to the predicted probability that the input image belongs to a given class    
-
-
-
+15. We trained first_model with EarlyStopping and ModelCheckpoint callbacks.  
+   
   
 ### first_model, the ResNet50-based model  
   
