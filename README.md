@@ -96,21 +96,21 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
    * Layer freezing effectively turned ResNet50 into a feature extractor.  
     
 10. We built both submodels with the Functional API because it supports more flexibility than the Sequential API. In particular, the Functional API
-   * Affords more flexibility when combining pre-trained models with custom layers or sharing layers between models 
-   * Allows for explicit definition of the flow of data, enabl fine control over how layers connect and interact  
-   * Supports freezing layers and chaining models  
-   * Handles the complexities involved in ensembling models  
+    * Affords more flexibility when combining pre-trained models with custom layers or sharing layers between models 
+    * Allows for explicit definition of the flow of data, enabl fine control over how layers connect and interact  
+    * Supports freezing layers and chaining models  
+    * Handles the complexities involved in ensembling models  
      
 11. We added custom layers on top of the ResNet50-based base to allow the final model to complete our four-class classification task and to be ensembled and chained with the other submodel.
-   * Both the BatchNormalization and Dropout layers helped improve generalization on unseen data.  
-   * The Dense(256, activation='relu) layer learned more complex patterns from the high-level features provided by ResNet50
-   * These more complex patterns became relevant to our classification task
-   * The ReLU activation function supported the custom layers to model more intricate relationships between features
-   * Dropout(0.3) was intended to prevent overfitting by forcing the model to learn more robust features and preventing it from becoming too reliant on specific neurons 
+    * Both the BatchNormalization and Dropout layers helped improve generalization on unseen data.  
+    * The Dense(256, activation='relu) layer learned more complex patterns from the high-level features provided by ResNet50
+    * These more complex patterns became relevant to our classification task
+    * The ReLU activation function supported the custom layers to model more intricate relationships between features
+    * Dropout(0.3) was intended to prevent overfitting by forcing the model to learn more robust features and preventing it from becoming too reliant on specific neurons 
   
 12. We defined the output layer Dense(class_count, activation = 'softmax') to output a probability distribution across the classes (given by class_count).
-   * Each value in the probability distribution corresponded to the predicted probability that the input image belonged to a given class
-   * We chose the Softmax activation because it can return a probability distribution over three or more classes
+    * Each value in the probability distribution corresponded to the predicted probability that the input image belonged to a given class
+    * We chose the Softmax activation because it can return a probability distribution over three or more classes
     
 14. We compiled first_model with optimizer=optimizer, loss='sparse_categorical_crossentropy', and metrics=['accuracy'].
 
