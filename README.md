@@ -94,7 +94,7 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
 9. With for layer in base_model.layers: layer.trainable = False, we avoided re-training ResNet50s pre-trained knowledge by "freezing" its layers.  
    * Making these layers untrainable preserved the features ResNet50 learned during pre-training, keeping them from becoming over-written during training.    
             
-    * Layer freezing effectively turned ResNet50 into a feature extractor.  
+   * Layer freezing effectively turned ResNet50 into a feature extractor.  
     
 10. We built both submodels with the Functional API because it supports more flexibility than the Sequential API. In particular, the Functional API  
    * Affords more flexibility when combining pre-trained models with custom layers or sharing layers between models 
@@ -109,11 +109,9 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
    * Both the BatchNormalization and Dropout layers helped improve generalization on unseen data.  
        
    * The Dense(256, activation='relu) layer learned more complex patterns from the high-level features provided by ResNet50
-      * These more complex patterns became relevant to our classification task
-        
-      * The ReLU activation function supported the custom layers to model more intricate relationships between features
-    
-  * Dropout(0.3) was intended to prevent overfitting by forcing the model to learn more robust features and preventing it from becoming too reliant on specific neurons 
+   * These more complex patterns became relevant to our classification task
+   * The ReLU activation function supported the custom layers to model more intricate relationships between features
+   * Dropout(0.3) was intended to prevent overfitting by forcing the model to learn more robust features and preventing it from becoming too reliant on specific neurons 
   
 12. We defined the output layer Dense(class_count, activation = 'softmax') to output a probability distribution across the classes (given by class_count).
    * Each value in the probability distribution corresponded to the predicted probability that the input image belonged to a given class
