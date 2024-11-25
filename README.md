@@ -23,6 +23,7 @@ Transfer Learning/model chaining
 The data for this project was obtained here: https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images  
 
 The notebook for this project is Ensemble_Chain_ResNet_custom_manual_sparse.ipynb.
+  
     
 ## Convolutional Neural Networks  
   
@@ -101,7 +102,7 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
     * The Dense(256, activation='relu) layer learned more complex patterns from the high-level features provided by ResNet50
     * These more complex patterns became relevant to our classification task
     * The ReLU activation function supported the custom layers to model more intricate relationships between features
-    * Dropout(0.3) was intended to prevent overfitting by forcing the model to learn more robust features and preventing it from becoming too reliant on specific neurons 
+    * Dropout(0.25) was intended to prevent overfitting by forcing the model to learn more robust features and preventing it from becoming too reliant on specific neurons 
   
 12. Defined identical output layers in each submodel:
     * Dense(class_count, activation = 'softmax') to output a probability distribution across the classes (given by class_count).
@@ -120,9 +121,7 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
 
 
 
-<img width="914" alt="Screenshot 00a" src="https://github.com/user-attachments/assets/1c553bd2-3721-4a88-a616-a1523fc68a76">
-<img width="915" alt="Screenshot 00b" src="https://github.com/user-attachments/assets/a056c7aa-509f-4825-8a81-d6ed52e130a4">
-## ensemble_model, combining the predictions of first_model and second-model
+
 
   
 ### Ensembling Models
@@ -366,3 +365,9 @@ Because we were working with four distinct image lables classes (adenocarcinoma,
 
 
 
+
+
+
+<img width="914" alt="Screenshot 00a" src="https://github.com/user-attachments/assets/1c553bd2-3721-4a88-a616-a1523fc68a76">
+<img width="915" alt="Screenshot 00b" src="https://github.com/user-attachments/assets/a056c7aa-509f-4825-8a81-d6ed52e130a4">
+## ensemble_model, combining the predictions of first_model and second-model
