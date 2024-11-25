@@ -55,7 +55,7 @@ The benefits of pre-training include improved performance, better generalization
 
 Pre-trained models often generalize better to new tasks because they start with a solid understanding of basic features and patterns, which can help improve accuracy on the new task. Pre-training can be a powerful technique, especially when data are scarce or where training a model from scratch would be impractical given resource constraints.  
 
-### Submodel Compatibility Considerations
+## Submodel Compatibility Considerations
   
 To ensure our custom CNN and the pre-trained CNN would be compatible with each other for direct ensembling and transfer learning puposes, we took the following precautions and made adaptations to the original ResNet50 model. Note we refer to our ResNet50-based model as first_model.   
   
@@ -65,11 +65,11 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
     
 2. Specified image_size as (224, 224) for first_model because ResNet50-based models expect images of that size. For purposes of consistency, we set the image_size to (224, 224) for second_model as well.  
      
-3. Specified channels, img_shape, and class_count to be identical to those in the custom CNN
+3. Specified channels, img_shape, and class_count in first_model to be identical to those in second_model
    
-4. Defined the same data augmentation layers as in our custom CNN and applied the data augmentation to the input tensor
+4. Defined the same data augmentation layers in both submodels and applied data augmentation to the input tensor
   
-5. Defined the same rescaling layers as in our custome CNN, and specified the input tensor as the scaled inputs
+5. Defined the same rescaling layers in both submodels, and specified the input tensor as the scaled inputs
    
 6. Applied data augmentation and rescaling in both submodels, early in the model pipeline
     * When ensembling two models, it is appropriate to apply data augmentation and rescaling in both submodels.
@@ -86,30 +86,31 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
    * Without pooling='max', we would have needed to explicitly add a Flatten layer to convert the 4D tensor to 2D in order to avoid a shape mismatch error. Though a Flatten layer would have resolved the shape issue, it would generate a larger input size for the Dense layers, increasing the risk of overfitting.  
    * Unlike Flattening, which preserves all spatial information to return a high-dimensional feature vector, global pooling reduces dimensionality.   
   
-11. Specified for layer in base_model.layers: layer.trainable = False, to avoid re-training ResNet50's pre-trained knowledge during model training.  
+9. Specified for layer in base_model.layers: layer.trainable = False, to avoid re-training ResNet50's pre-trained knowledge during model training.  
    * Making these layers untrainable preserved the features ResNet50 learned during pre-training, keeping them from becoming over-written during training.  
    * Layer freezing effectively turned ResNet50 into a feature extractor.  
     
-12. Built both submodels with the Functional API because it supports more flexibility than the Sequential API. In particular, the Functional API
+10. Built both submodels with the Functional API because it supports more flexibility than the Sequential API. In particular, the Functional API
     * Affords more flexibility when combining pre-trained models with custom layers or sharing layers between models 
     * Allows for explicit definition of the flow of data, enabl fine control over how layers connect and interact  
     * Supports freezing layers and chaining models  
     * Handles the complexities involved in ensembling models  
      
-12. Added custom layers on top of the ResNet50-based base to allow the final model to complete our four-class classification task and to be ensembled and chained with the other submodel.
+11. Added custom layers on top of the ResNet50-based base to allow the final model to complete our four-class classification task and to be ensembled and chained with the other submodel.
     * Both the BatchNormalization and Dropout layers helped improve generalization on unseen data.  
     * The Dense(256, activation='relu) layer learned more complex patterns from the high-level features provided by ResNet50
     * These more complex patterns became relevant to our classification task
     * The ReLU activation function supported the custom layers to model more intricate relationships between features
     * Dropout(0.3) was intended to prevent overfitting by forcing the model to learn more robust features and preventing it from becoming too reliant on specific neurons 
   
-13. Defined the output layer Dense(class_count, activation = 'softmax') to output a probability distribution across the classes (given by class_count).
+12. Defined identical output layers in each submodel:
+    * Dense(class_count, activation = 'softmax') to output a probability distribution across the classes (given by class_count).
     * Each value in the probability distribution corresponded to the predicted probability that the input image belonged to a given class
     * We chose the Softmax activation because it can return a probability distribution over three or more classes
     
 14. Compiled both submodels with optimizer=optimizer, loss='sparse_categorical_crossentropy', and metrics=['accuracy'].
 
-15. Trained both submodels with EarlyStopping and ModelCheckpoint callbacks.  
+15. Trained both submodels with identical EarlyStopping and ModelCheckpoint callbacks.  
    
   
 
