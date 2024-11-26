@@ -56,6 +56,7 @@ The benefits of pre-training include improved performance, better generalization
 
 Pre-trained models often generalize better to new tasks because they start with a solid understanding of basic features and patterns, which can help improve accuracy on the new task. Pre-training can be a powerful technique, especially when data are scarce or where training a model from scratch would be impractical given resource constraints.  
 
+  
 ## Submodel Compatibility Considerations
   
 To ensure our custom CNN and the pre-trained CNN would be compatible with each other for direct ensembling and transfer learning puposes, we took the following precautions and made adaptations to the original ResNet50 model. Note we refer to our ResNet50-based model as first_model.   
@@ -111,8 +112,7 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
     
 14. Compiled both submodels with optimizer='adam', loss='sparse_categorical_crossentropy', and metrics=['accuracy']. We chose the 'sparse_categorical_crossentropy' function because our dataset includes integer labels and it works for most multi-classification tasks.  
 
-15. Trained both submodels with identical EarlyStopping and ModelCheckpoint callbacks.  
-   
+15. Trained both submodels with identical EarlyStopping and ModelCheckpoint callbacks. 
   
   
 ### Model Ensembling  
@@ -156,21 +156,38 @@ An alternative to ensembling two models is chaining them. After pre-training, a 
   
   
 # Chaining Models  
-The considerations we had to take into account when chaining model_one and model_two included:
+The considerations we had to take into account when chaining model_one and model_two included:  
+   
+1. We removed the final, dense layer from first_model because we didn't want it to generate a vector representing class probabilities. We wanted to use first_model only as a feature extractor, allowing second_model to generate the class probabilities.  
+    * We defined a new output layer to serve as feature extraction, mod_first_model_output = x  
+    * Thus, the final output of our modified first_model became the result of the Dropout layer, the layer immediately preceding the final output layer.  
+    * We saved this modified version of first_model as mod_first_model  
+      
+2. Data augmentation and rescaling was necessary only in the first of two chained submodels, when using the Functional API. We removed augmentation and rescaling layers from second_model, which we saved and renamed mod_second_model.  
+   
+3. We removed the dropout, convolutional, and pooling layers present in second_model from mod_second_model because such layers are already present in the ResNet50 base of mod_first_model. Not removing these custom layers risked: 
+      
+    a. Over-Parameterization, which can result in a model with too many parameters. Over-Parameterized models  
+       * Have an increased risk of overfitting, especially on small datasets  
+       * May require more computational resources  
+       * Can make training unstable  
   
-1. Data augmentation and rescaling is necessary only in the first of two models, when using the Functional API.
-   
-2. Define but don't compile and train the submodels contributing to the chained model until the chained model is defined.
-   
-3. We removed the final, dense layer from first_model because we didn't want it to generate a vector representing class probabilities. We wanted to use first_model only as a feature extractor, allowing second_model to generate the class probabilities.
-    * We defined a new output layer to serve as feature extraction, mod_first_model_output = x
-    * Thus, the final output of our modified first_model is the result of the Dropout layer, the layer immediately preceding the final output layer
-    * We saved this modified version of first_model as mod_first_model
-      
-4. We defined  
-      
+    b. Redundant Feature Extraction, which can cause computational inefficiency and
+possible degradation of learned features, as custom layers "over-process" the features  
+    c. Loss of Transfer Learning Benefits, if custom layers on top of ResNet50 disrupt the transfer learning proces  
+       * If the transfer learning process is disrupted, training essentially begins again from scrath and the benefit of pretrained weights is lost  
+       * Custom layers may not complement the ResNet50-extracted features, reducing model effectiveness  
+       * Custom layers could undermine the pre-trained model's ability to generalize
 
-
+    d. Training Instability, which can occur when excessive layers make the model architecture deeper and more complex than necessary  
+  
+    e. Increased Risk of Overfitting, resulting in the model memorizing the training data instead of learning generalizable patters  
+  
+4. We removed the Flatten layer present in second_model, as it was no longer necessary.   
+  
+5. We defined one Dense and one Dropout layer before defining the output layer, designed to produce a four-class classification
+    
+6. We defined but don't compile and train mod_first_model and mod_second_model
 
 
 
