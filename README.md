@@ -168,9 +168,9 @@ The considerations we had to take into account when chaining model_one and model
     * Thus, the final output of our modified first_model became the result of the Dropout layer, the layer immediately preceding the final output layer.  
     * We saved this modified version of first_model as mod_first_model  
       
-2. Data augmentation and rescaling was necessary only in the first of two chained submodels. We removed augmentation and rescaling layers from second_model, which we saved and renamed mod_second_model.  
+2. Because data augmentation and rescaling is necessary only in the first of two chained submodels, we removed augmentation and rescaling layers from second_model and saved and renamed it mod_second_model.  
    
-3. We removed the dropout, convolutional, and pooling layers present in second_model from mod_second_model because such layers are already present in the ResNet50 base of mod_first_model. Not removing these custom layers risked: 
+3. Removing the dropout, convolutional, and pooling layers present in second_model from mod_second_model because such layers are already present in the ResNet50 base of mod_first_model. Not removing these custom layers risked: 
       
    * Over-Parameterization, which could have resulted in a model with too many parameters. Over-Parameterized models  
       * Have an increased risk of overfitting, especially on small datasets
@@ -189,30 +189,32 @@ possible degradation of learned features, as custom layers "over-process" the fe
   
    * Increased Risk of Overfitting, resulting in the model memorizing the training data instead of learning generalizable patterns  
   
-5. We removed the Flatten layer present in second_model, as it was no longer necessary.   
+5. Removing second_model's Flatten layer from mod_second_model, as it was no longer necessary.   
   
-6. We defined one Dense and one Dropout layer before defining the output layer, designed to produce a four-class classification  
+6. Defining one Dense and one Dropout layer before defining an output layer capable of producing a four-class classification.  
     
 7. We defined but din't compile and train mod_first_model and mod_second_model, because we would chain them in the chained_model  DO WE END UP TRAINING THE TWO SUbmodels before we train the COMPOSITE MODEL???????
 
-8. In order to chain mod_first_model and mod_second_model, we
+8. Chaining mod_first_model and mod_second_model by:
    
-   * Defined variable 'mod_first_model_output' to hold the feature vector output from 'mod_first_model'; mod_first_model_output = mod_first_model.output  
-   * Passed feature vector mod_first_model_output into mod_second_model, which would take the feature vector and process it further through its own layers
-   * Defined variable 'mod_second_model_output' to hold mod_second_model's output (classification probabilities) by setting mod_second_model_output = mod_second_model(mod_first_model_output)     
-   * Defined a new Keras model called chained_model that chains together mod_first_model and mod_second_model into one model by
+   * Defining variable 'mod_first_model_output' to hold the feature vector output from 'mod_first_model'; mod_first_model_output = mod_first_model.output  
+   * Passing feature vector mod_first_model_output into mod_second_model, which would take the feature vector and process it further through its own layers
+   * Defining variable 'mod_second_model_output' to hold mod_second_model's output (classification probabilities) by setting mod_second_model_output = mod_second_model(mod_first_model_output)     
+   * Defining a new Keras model called chained_model that chains together mod_first_model and mod_second_model into one model by
        * Setting chained_model = Model(inputs=mod_first_model.input, outputs=mod_second_model_output)
        * Where inputs=mod_first_model.input specifies that the input to chained_model is the same as the input to mod_first_model, and
        * Where outputs=mod_second_model_output specifies that chained_model's output is taken from mod_second_model_output,
        * Which was the output of mod_second_model after the feature vector was passed from mod_first_model
 
-9. Defined mod_first_model_output as mod_first_model_model.output, effectively making mod_first_model's layers the first 'link' in the chain.
+9. Defining mod_first_model_output as mod_first_model_model.output, effectively making mod_first_model's layers the first 'link' in the chain.
    
-10. Definined mod_second_model_output as mod_second_model(mod_first_model_output), to pass the first 'link's' output to the second 'link' in the chain, mod_second_model.
+10. Definining mod_second_model_output as mod_second_model(mod_first_model_output), to pass the first 'link's' output to the second 'link' in the chain, mod_second_model.
    
-11. Defined the output of the second link in the chain as mod_second_model_output, allowing us to define the composite model, chained_model, as Model(inputs=mod_resnet_model.input, outputs=mod_custom_cnn_output).
+11. Defining the output of the second link in the chain as mod_second_model_output, allowing us to define the composite model, chained_model, as Model(inputs=mod_resnet_model.input, outputs=mod_custom_cnn_output).
     
-12. Specified optimizer = Adam(), defined a filepath to save chained_model's best model, and defined equivalent EarlyStopping and ModelCheckpoint callbacks as we'd used previously. We trained chained_model on the dataset training_set and set validation_set as the validation_data.   
+12. Specifying optimizer = Adam(), defining a filepath to save chained_model's best model, and defining equivalent EarlyStopping and ModelCheckpoint callbacks as used previously.
+    
+13. Training chained_model on the dataset training_set and setting validation_set as the validation_data.   
 
 
 ## Evaluating all four models
