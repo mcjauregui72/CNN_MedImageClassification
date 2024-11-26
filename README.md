@@ -143,11 +143,17 @@ We took the following steps to prepare for and build the ensemble_mode:
 5. Built, compiled, and trained the ensemble_model, in the same manner as with the two submodels, to process the combined predictions.   
     * Defined ensemble_input_train as the simple average of the first_model's predictions on the training_set and the second_model's predictions on the training_set.
     * Defined ensemble_input_val as the simple average of the first_model's predictions on the validation_set and the second_model's predictions on the validation set.
-    * Defined ensemble_input as the input layer for the ensemble_model, Input(shape=(4,))
-    * Added a Dense layer as the output layer, final_output = Dense(4, activation='softmax')(ensemble_input)
+    * Defined ensemble_input as the input layer for the ensemble_model, with Input(shape=(4,)) because
+        * The submodels output predictions of shape (None, 4), which ensemble_model takes as inputs  
+        * The ensemble_model does not take the image datasets fed to the submodels
+    *  Added a Dense layer as the output layer, final_output = Dense(4, activation='softmax')(ensemble_input)
     * Defined ensemble_model as Model(inputs=ensemble_input, outputs = final_output)
     * Compiled ensemble_model with optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy']
-    * In training the ensemble_model, we used ensemble_input_train as our x and y_train - the true labels from our training_set as our true labels corresponding with the averaged training_set predictions.
+    * To train the ensemble_model, we used ensemble_input_train as our x and y_train - the true labels from our training_set as our true labels corresponding with the averaged training_set predictions.
+    
+
+   
+   
       
       
 ## Transfer Learning   
@@ -187,54 +193,13 @@ possible degradation of learned features, as custom layers "over-process" the fe
   
 5. We defined one Dense and one Dropout layer before defining the output layer, designed to produce a four-class classification
     
-6. We defined but don't compile and train mod_first_model and mod_second_model
+6. We defined but din't compile and train mod_first_model and mod_second_model, because we would chain them into chained_model
 
 
 
 
 
-### Building first_model from pretrained ResNet50
-
-
-### first_model
-
-<img width="913" alt="Screenshot01" src="https://github.com/user-attachments/assets/f907df78-a421-4290-b85d-287d9dedf82f">
-<img width="906" alt="Screenshot02" src="https://github.com/user-attachments/assets/15840ff8-05c8-4569-be6f-304f19b4e251">
-<img width="903" alt="Screenshot03" src="https://github.com/user-attachments/assets/88c8107c-3a46-452e-90b9-6844647aeae4">
-<img width="913" alt="Screenshot 04" src="https://github.com/user-attachments/assets/c61d8576-6345-4c2a-9c74-a345b50db68f">
-<img width="914" alt="Screenshot 05" src="https://github.com/user-attachments/assets/3c702eec-23b1-4138-960f-e9a53b320867">
-<img width="914" alt="Screenshot 06" src="https://github.com/user-attachments/assets/7236696d-ceb5-4b35-b3b6-f2716be9ff8c">
-
-
-### Use of Data Augmentation and Rescaling
-
-When ensembling two models, it is appropriate to apply data augmentation and rescaling in both submodels. It is also appropriate to apply data augmentation and rescaling early in the model pipeline. In particular, data augmentation should come before rescaling, right after defining the model's input layer. Because the ResNet50 base_model component of our first_model expected inputs' pixel values to be normalized to a range between 0 and 1, we rescaled the input data before passing it to the ResNet50 layers.  
-
-We applied augmentation and rescaling within first_model and second_model by   
-a) defining data augmentation layers within a Sequential model    
-b) applying the data augmentation layers to the input tensor    
-c) including the augmented inputs as part of a Rescaling layer  
-
-Even though we created first_model with the Functional API, the data augmentation portion of it was created with the Sequential API. Sequential components of larger models, such as data augmentation pipelines, can be integrated into models built with the Functional API. Both APIs produce layers compatibile with the Keras ecosystem. Because data augmentation transforms input data before it reaches the model's core, it doesn't affect the flow of data within the larger model. Defining data augmentation as a Sequential block effectively creates a single layer that acts as any Keras layer. 
-
-Including the augmented inputs as part of the Rescaling layer was necessary because in the Functional API, the data flow between model layers is explicitly defined by passing the output of one layer as the input to next layer. In the scaled_inputs = Rescaling(1./255)(augmented_inputs) statement, the '(augmented_inputs)' explicitly indicates the rescaling operation should be applied to the output of the previous layer, augmented_inputs. Without passing '(augmented_inputs)' as the input, the models would not know which data should be rescaled.   
-
-
-### second_model
-
-As we designed the base cnn model, second_model, for our four-class classification task, few alternations to this model were necessary until it came time to chain first_model and second_model. The one modification we made prior to training second_model was to re-define and re-train it using the Functional API. In earlier attempts to ensembled second_model with first_model, our initial choice of defining and training second_model using the Sequential API proved complicating. We defined and trained first_model using the Functional API, to accommodate the ResNet50's greater complexity, but not second_model. As such, we neede to redefine, recompiled, and retrained second_model the Functional API. 
-
-<img width="910" alt="Screenshot 09" src="https://github.com/user-attachments/assets/6d4d5ca1-4dce-44ba-98b3-90e6720ad515">
-<img width="907" alt="Screenshot 10" src="https://github.com/user-attachments/assets/1bb08068-4152-4ccf-8619-192297c71e0b">
-<img width="910" alt="Screenshot 11" src="https://github.com/user-attachments/assets/2789d83c-bd25-4e8d-92b4-5feecfdea36a">
-<img width="929" alt="Screenshot 12" src="https://github.com/user-attachments/assets/00a41035-6806-45af-90d8-eb67824362b1">
-<img width="928" alt="Screenshot 13" src="https://github.com/user-attachments/assets/261455e6-73b5-4ad2-ba62-0d30652e8929">
-<img width="912" alt="Screenshot 14" src="https://github.com/user-attachments/assets/cfdd3fba-05a4-4227-bdbc-624346d344e8">
-
-
-We compiled both models with the Adam optimizer, and with the loss function set to sparse_categorical_crossentropy. We trained both with x as the training_set dataset and validation_data as the validation_set dataset. Training lasted for 100 epochs, unless our EarlyStopping callback - set to monitor 'val_accuracy' with a patience value of 20 - stopped training early. 
-
-## Ensembling Models
+ Ensembling Models
 
 After training first_model and second_model, we created a third model, ensemble_model, to average the first two models' output. The submodels output predictions of shape (None, 4). The ensemble_model takes these outputs as inputs. We do not feed the same image datasets we fed to the submodels to the ensemble_model. Only the predictions (outputs) from first_model and second_model are inputs to ensemble_model.
 
