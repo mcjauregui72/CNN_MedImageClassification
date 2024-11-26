@@ -177,7 +177,7 @@ The considerations we had to take into account when chaining model_one and model
     b. Redundant Feature Extraction, which can cause computational inefficiency and
 possible degradation of learned features, as custom layers "over-process" the features
   
-    c. Loss of Transfer Learning Benefits, if custom layers on top of ResNet50 disrupt the transfer learning proces
+    c. Loss of Transfer Learning Benefits, if custom layers on top of ResNet50 disrupt the transfer learning process
         -    If the transfer learning process is disrupted, training essentially begins again from scrath and the benefit of pretrained weights is lost  
         -    Custom layers may not complement the ResNet50-extracted features, reducing model effectiveness  
         -    Custom layers could undermine the pre-trained model's ability to generalize
