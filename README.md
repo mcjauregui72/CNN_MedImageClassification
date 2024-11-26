@@ -170,18 +170,17 @@ The considerations we had to take into account when chaining model_one and model
 3. We removed the dropout, convolutional, and pooling layers present in second_model from mod_second_model because such layers are already present in the ResNet50 base of mod_first_model. Not removing these custom layers risked: 
       
    * Over-Parameterization, which can result in a model with too many parameters. Over-Parameterized models  
-       -    Have an increased risk of overfitting, especially on small datasets
-       -    May require more computational resources
-       -    Can make training unstable  
+      * Have an increased risk of overfitting, especially on small datasets
+      * May require more computational resources
+      * Can make training unstable  
   
    * Redundant Feature Extraction, which can cause computational inefficiency and
 possible degradation of learned features, as custom layers "over-process" the features
 
-   * Loss of Transfer Learning Benefits, if custom layers on top of ResNet50 disrupt the transfer learning process
-       
-         * If the transfer learning process is disrupted, training essentially begins again from scrath and the benefit of pretrained weights is lost  
-         * Custom layers may not complement the ResNet50-extracted features, reducing model effectiveness  
-         * Custom layers could undermine the pre-trained model's ability to generalize
+   * Loss of Transfer Learning Benefits, if custom layers on top of ResNet50 disrupt the transfer learning process  
+      * If the transfer learning process is disrupted, training essentially begins again from scrath and the benefit of pretrained weights is lost  
+      * Custom layers may not complement the ResNet50-extracted features, reducing model effectiveness  
+      * Too many layers could undermine the pre-trained model's ability to generalize
 
    * Training Instability, which can occur when excessive layers make the model architecture deeper and more complex than necessary  
   
