@@ -169,9 +169,9 @@ The considerations we had to take into account when chaining model_one and model
    
 3. We removed the dropout, convolutional, and pooling layers present in second_model from mod_second_model because such layers are already present in the ResNet50 base of mod_first_model. Not removing these custom layers risked: 
       
-    a. Over-Parameterization, which can result in a model with too many parameters. Over-Parameterized models  
-          * Have an increased risk of overfitting, especially on small datasets  
-          * May require more computational resources  
+    a. Over-Parameterization, which can result in a model with too many parameters. Over-Parameterized models
+          * Have an increased risk of overfitting, especially on small datasets
+          * May require more computational resources
           * Can make training unstable  
   
     b. Redundant Feature Extraction, which can cause computational inefficiency and
