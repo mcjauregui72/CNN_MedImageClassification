@@ -151,10 +151,6 @@ We took the following steps to prepare for and build the ensemble_mode:
     * Compiled ensemble_model with optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy']
     * To train the ensemble_model, we used ensemble_input_train as our x and y_train - the true labels from our training_set as our true labels corresponding with the averaged training_set predictions.
     
-
-   
-   
-      
       
 ## Transfer Learning   
 
@@ -174,17 +170,17 @@ The considerations we had to take into account when chaining model_one and model
 3. We removed the dropout, convolutional, and pooling layers present in second_model from mod_second_model because such layers are already present in the ResNet50 base of mod_first_model. Not removing these custom layers risked: 
       
     a. Over-Parameterization, which can result in a model with too many parameters. Over-Parameterized models  
-       * Have an increased risk of overfitting, especially on small datasets  
-       * May require more computational resources  
-       * Can make training unstable  
+          * Have an increased risk of overfitting, especially on small datasets  
+          * May require more computational resources  
+          * Can make training unstable  
   
     b. Redundant Feature Extraction, which can cause computational inefficiency and
 possible degradation of learned features, as custom layers "over-process" the features
   
     c. Loss of Transfer Learning Benefits, if custom layers on top of ResNet50 disrupt the transfer learning proces  
-       * If the transfer learning process is disrupted, training essentially begins again from scrath and the benefit of pretrained weights is lost  
-       * Custom layers may not complement the ResNet50-extracted features, reducing model effectiveness  
-       * Custom layers could undermine the pre-trained model's ability to generalize
+          * If the transfer learning process is disrupted, training essentially begins again from scrath and the benefit of pretrained weights is lost  
+          * Custom layers may not complement the ResNet50-extracted features, reducing model effectiveness  
+          * Custom layers could undermine the pre-trained model's ability to generalize
 
     d. Training Instability, which can occur when excessive layers make the model architecture deeper and more complex than necessary  
   
