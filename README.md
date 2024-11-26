@@ -158,6 +158,9 @@ An alternative to ensembling two models is chaining them. After pre-training, a 
   
   
 # Chaining Models  
+
+Chaining two models together means creating a composite model, where the first model's output becomes the input for the second model's layers. The output of the first model in a two-model chain is not a classification, but feature vectors that will help the second model's layers make a classification. Chaining two models results in a single model that can be trained end-to-end. Model chaining can be performed using the Functional API in a Keras framework, which allows for flexible connection of layers and models. 
+  
 The considerations we had to take into account when chaining model_one and model_two included:  
    
 1. We removed the final, dense layer from first_model because we didn't want it to generate a vector representing class probabilities. We wanted to use first_model only as a feature extractor, allowing second_model to generate the class probabilities.  
@@ -165,102 +168,51 @@ The considerations we had to take into account when chaining model_one and model
     * Thus, the final output of our modified first_model became the result of the Dropout layer, the layer immediately preceding the final output layer.  
     * We saved this modified version of first_model as mod_first_model  
       
-2. Data augmentation and rescaling was necessary only in the first of two chained submodels, when using the Functional API. We removed augmentation and rescaling layers from second_model, which we saved and renamed mod_second_model.  
+2. Data augmentation and rescaling was necessary only in the first of two chained submodels. We removed augmentation and rescaling layers from second_model, which we saved and renamed mod_second_model.  
    
 3. We removed the dropout, convolutional, and pooling layers present in second_model from mod_second_model because such layers are already present in the ResNet50 base of mod_first_model. Not removing these custom layers risked: 
       
-   * Over-Parameterization, which can result in a model with too many parameters. Over-Parameterized models  
+   * Over-Parameterization, which could have resulted in a model with too many parameters. Over-Parameterized models  
       * Have an increased risk of overfitting, especially on small datasets
       * May require more computational resources
       * Can make training unstable  
   
-   * Redundant Feature Extraction, which can cause computational inefficiency and
-possible degradation of learned features, as custom layers "over-process" the features
-
-   * Loss of Transfer Learning Benefits, if custom layers on top of ResNet50 disrupt the transfer learning process  
+   * Redundant Feature Extraction, which could have caused computational inefficiency and
+possible degradation of learned features, as custom layers "over-process" the features  
+  
+   * Loss of Transfer Learning Benefits, if custom layers on top of ResNet50 had disrupted the transfer learning process  
       * If the transfer learning process is disrupted, training essentially begins again from scrath and the benefit of pretrained weights is lost  
       * Custom layers may not complement the ResNet50-extracted features, reducing model effectiveness  
-      * Too many layers could undermine the pre-trained model's ability to generalize
+      * Too many layers could undermine the pre-trained model's ability to generalize  
 
    * Training Instability, which can occur when excessive layers make the model architecture deeper and more complex than necessary  
   
-   * Increased Risk of Overfitting, resulting in the model memorizing the training data instead of learning generalizable patters  
+   * Increased Risk of Overfitting, resulting in the model memorizing the training data instead of learning generalizable patterns  
   
 5. We removed the Flatten layer present in second_model, as it was no longer necessary.   
   
-6. We defined one Dense and one Dropout layer before defining the output layer, designed to produce a four-class classification
+6. We defined one Dense and one Dropout layer before defining the output layer, designed to produce a four-class classification  
     
-7. We defined but din't compile and train mod_first_model and mod_second_model, because we would chain them into chained_model
+7. We defined but din't compile and train mod_first_model and mod_second_model, because we would chain them in the chained_model  
 
-
-
-
-
- Ensembling Models
-
-After training first_model and second_model, we created a third model, ensemble_model, to average the first two models' output. The submodels output predictions of shape (None, 4). The ensemble_model takes these outputs as inputs. We do not feed the same image datasets we fed to the submodels to the ensemble_model. Only the predictions (outputs) from first_model and second_model are inputs to ensemble_model.
-
-
-### Extracting dataset labels
-
-Unlike the original input datasets, which contained images and class labels, the inputs to the ensemble_model lacks labels. Thus, we needed to extract the labels from the TensorFlow datasets and give them to ensemble_model. These labels are necessary for the ensemble_model to compute loss values, which entails comparing predictions to true labels. 
-
-<img width="921" alt="Screenshot 15" src="https://github.com/user-attachments/assets/349ac984-af66-4000-92e4-8acc58df8fd1">
-<img width="932" alt="Screenshot 16" src="https://github.com/user-attachments/assets/43efe309-5737-485f-96d4-0992ab5cf365">
-
-
-### Preparing data and building ensemble model to average outputs
-
-Before we could build the ensemble_model to process the two submodels's output (predictions), we needed to generate predictions from first_model and second_model using the training_set and validation_set. We had used both training_set and validation_set to train each submodel, so we needed predictions from these same models on the same datasets to be inputs to the ensemble_model
-
-Next, we defined the EarlyStopping and ModelCheckpoint callbacks to be used to train ensemble_model. We kept these callback definitions consistent with those used in the two submodels. If the accuracy on the validation dataset did not improve after 20 epochs, the model training would come to an early stop rather than continue on for 100 epochs. Similarly, we defined a filepath to save the best version of the model (that with the maximum validation accuracy). 
-
-
-<img width="912" alt="Screenshot 17" src="https://github.com/user-attachments/assets/d97b10b3-7c94-4552-833b-b12ca1dc4789">
-<img width="907" alt="Screenshot 18" src="https://github.com/user-attachments/assets/9a4d3a77-3bc1-46f4-91d3-c20df954c988">
-
-
-We defined ensemble_model to average the training_set and validation_set predictions made by first_model and second_model. Keras performs this averaging element-wise across the class probabilities for each sample. Though the submodels' ouput were of shape (None, 4), with None representing variable batch size and 4 representing class probabilities for each image in the batch, Keras implicitly understood that each sample in each batch had a shape of (4,). This was equivalent to the shape ensemble_model expected for its inputs, tensors representing the 4 class probabilities for each sample. We didn't need to reshape any outputs explicitly. The implicit reshaping made it possible to combine the submodel outputs on a sample-by-sample basis rather than processing whole batches of predictions at once. We simply had to specify the shape of each sample with ensemble_input = Input(shape=(4,)).
-
-
-<img width="913" alt="Screenshot 19" src="https://github.com/user-attachments/assets/ce1519c3-a742-4a86-8092-b41b80949a93">
-<img width="907" alt="Screenshot 20" src="https://github.com/user-attachments/assets/99d07b95-cb92-4db1-9591-4dfa66fe95c4">
-<img width="914" alt="Screenshot 21" src="https://github.com/user-attachments/assets/9121fc34-0c2a-46dc-8223-34c25be54238">
-<img width="913" alt="Screenshot 22" src="https://github.com/user-attachments/assets/5ccd775e-92c9-40eb-be30-30db71dbee08">
-
-
-We compiled and trained ensemble_model in the same manner as we did its two submodels. Here, our x value became the averaged training_set predictions from the first and second model, while our y values became the true labels corresponding to the averaged training predictions. Finally, the validation_data for the ensemble model became the averaged predictions from the two submodels on the validation dataset and the true labels for the validation dataset itself. 
-
+8. In order to chain mod_first_model and mod_second_model
+   
+  * We defined variable 'mod_first_model_output' to hold the feature vector output from 'mod_first_model'; mod_first_model_output = mod_first_model.output  
+  * We passed feature vector mod_first_model_output into mod_second_model, which would take the feature vector and process it further through its own layers
+  * We defined variable 'mod_second_model_output' to hold mod_second_model's output (classification probabilities) by setting mod_second_model_output = mod_second_model(mod_first_model_output)     
+  * Defined a new Keras model called chained_model that chains together mod_first_model and mod_second_model into one model by
+      * setting chained_model = Model(inputs=mod_first_model.input, outputs=mod_second_model_output)
+      * where inputs=mod_first_model.input specifies that the input to chained_model is the same as the input to mod_first_model
+      * and where outputs=mod_second_model_output specifies that chained_model's output is taken from mod_second_model_output,
+      * which was the output of mod_second_model after the feature vector was passed from mod_first_model
 
 ## Chaining Models
 
-Chaining two models together means creating a composite model, where the first model's output becomes the input for the second model's layers. In this scenario, there is no third model to process the outputs of the two submodels. The output of the first model in a two-model chain is not a classification, but features that will help the second model's layers make a classification. Chaining two models results in a single model that can be trained end-to-end.
-
-Model chaining can be performed using the Functional API in a Keras framework, which allows for flexible connection of layers and models. Unlike in the ensembling, where data augmentation and rescaling can be applied in both submodels, chaining two models requires specifying data augmentation and rescaling only in the first model's layers.
 
 
-## Modifying first_model from classifier to feature extractor
-
-Because we are turning first_model's output into second_model's input, some adjustments to the original versions of these models became necessary. In particular, first_model needed to be redefined from a classifier to a feature extractor. That is, first_model became tasked with processing raw input data (the ct scans) and producing informative features to be used for classification in second_model's layers. Pretrained models like ResNet50 are often used as feature extractors in transfer learning because they have already learned useful patterns from the large datasets on which they were trained. These patterns, or features, are reusable for new tasks. To diffferentiate first_model and it's modified version, we called our modified first_model 'mod_resnet_model'.
-
-<img width="902" alt="Screenshot 23" src="https://github.com/user-attachments/assets/d4cefbbe-8a3f-4922-a52e-db8b0c760121">
-<img width="896" alt="Screenshot 24" src="https://github.com/user-attachments/assets/dd23844d-69f2-4ebc-921b-fe6c621f5a55">
-<img width="883" alt="Screenshot 25" src="https://github.com/user-attachments/assets/70de0f23-1638-4e77-a7c1-31d83c48cf2a">
 
 
-## Modifying second_model to be compatibile for chaining
 
-In order to chain second_model with mod_resnet_model, we needed to omit the data augmentation and rescaling layers. We also needed to remove a number of second_model layers that became redundant when chained with mod_resnet_model. We named this altered version of second_model 'mod_custom_cnn_model' to keep the two distinct. 
-
-The layers we dropped from second_model to create mod_custom_cnn_model were the MaxPooling, Conv2D, and Dropout layers. The first_model layers, based on the ResNet50 model, already performed these operations in the first part of the chain. Reapplying these layers, by including them in second_model's layers, would have been redundant and not necessarily improved performance. The point of chaining first_model and second_model was to use ResNet50 for feature extraction and then use second_model to perform further processing on the extracted features for classification purposes.
-
-Because ResNet50 already included downsampling layers, adding additional pooling and convolution operations with second_model could have resulted in too much downsampling or feature over-processing.
-
-It was appropriate to still include data augmentation and rescaling before the ResNet50 layers since these operations were not part of the feature extraction operations. These pre-processing layers simply prepared the input data for feature extraction.
-
-
-<img width="901" alt="Screenshot 26" src="https://github.com/user-attachments/assets/3273d338-f2fc-4b9b-9045-2c29fc8df042">
-<img width="902" alt="Screenshot 27" src="https://github.com/user-attachments/assets/3f22b4f9-ec67-4976-9ad2-37f58f3a97a7">
 
 
 ## Defining, compiling, and training the chained model
