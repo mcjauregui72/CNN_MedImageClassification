@@ -193,38 +193,26 @@ possible degradation of learned features, as custom layers "over-process" the fe
   
 6. We defined one Dense and one Dropout layer before defining the output layer, designed to produce a four-class classification  
     
-7. We defined but din't compile and train mod_first_model and mod_second_model, because we would chain them in the chained_model  
+7. We defined but din't compile and train mod_first_model and mod_second_model, because we would chain them in the chained_model  DO WE END UP TRAINING THE TWO SUbmodels before we train the COMPOSITE MODEL???????
 
 8. In order to chain mod_first_model and mod_second_model
    
-  * We defined variable 'mod_first_model_output' to hold the feature vector output from 'mod_first_model'; mod_first_model_output = mod_first_model.output  
-  * We passed feature vector mod_first_model_output into mod_second_model, which would take the feature vector and process it further through its own layers
-  * We defined variable 'mod_second_model_output' to hold mod_second_model's output (classification probabilities) by setting mod_second_model_output = mod_second_model(mod_first_model_output)     
-  * Defined a new Keras model called chained_model that chains together mod_first_model and mod_second_model into one model by
-      * setting chained_model = Model(inputs=mod_first_model.input, outputs=mod_second_model_output)
-      * where inputs=mod_first_model.input specifies that the input to chained_model is the same as the input to mod_first_model
-      * and where outputs=mod_second_model_output specifies that chained_model's output is taken from mod_second_model_output,
-      * which was the output of mod_second_model after the feature vector was passed from mod_first_model
+   * We defined variable 'mod_first_model_output' to hold the feature vector output from 'mod_first_model'; mod_first_model_output = mod_first_model.output  
+   * We passed feature vector mod_first_model_output into mod_second_model, which would take the feature vector and process it further through its own layers
+   * We defined variable 'mod_second_model_output' to hold mod_second_model's output (classification probabilities) by setting mod_second_model_output = mod_second_model(mod_first_model_output)     
+   * Defined a new Keras model called chained_model that chains together mod_first_model and mod_second_model into one model by
+       * setting chained_model = Model(inputs=mod_first_model.input, outputs=mod_second_model_output)
+       * where inputs=mod_first_model.input specifies that the input to chained_model is the same as the input to mod_first_model
+       * and where outputs=mod_second_model_output specifies that chained_model's output is taken from mod_second_model_output,
+       * which was the output of mod_second_model after the feature vector was passed from mod_first_model
 
-## Chaining Models
-
-
-
-
-
-
-
-
-## Defining, compiling, and training the chained model
-
-We created the chained model by chaining the modified ResNet50-based model, 'mod_resnet_model', with the modified base cnn model, 'mod_custom_cnn_model'. The two individual models were, themselves, variations of first_model and second_model that made them compatible for chaining. 
-
-By defining mod_resnet_output as mod_resnet_model.output, we specified mod_resnet_model's layers as the first 'link' in the chain. By specifying mod_custom_cnn_output = mod_custom_cnn_model(mod_resnet_output), we passed the first 'link's' output to the second 'link' in the chain, mod_custom_cnn_model, and defined the resulting output as mod_custom_cnn_output. This allowed us to define the composite model, chained_model, as Model(inputs=mod_resnet_model.input, outputs=mod_custom_cnn_output). Before training chained_model, we specified optimizer = Adam(), defined a filepath to save chained_model's best model, and defined equivalent EarlyStopping and ModelCheckpoint callbacks as we'd used previously. We trained chained_model on the dataset training_set and set validation_set as the validation_data.   
-
-
-<img width="889" alt="Screenshot 28" src="https://github.com/user-attachments/assets/4a27f82a-462b-4287-af38-e2984f576bf3">
-<img width="913" alt="Screenshot 29" src="https://github.com/user-attachments/assets/78e3e396-7543-421a-a851-cb66eb0a264f">
-<img width="886" alt="Screenshot 30" src="https://github.com/user-attachments/assets/6c06d877-6cad-420b-9d57-806e501c9b28">
+9. By defining mod_first_model_output as mod_first_model_model.output, we specified mod_first_model's layers as the first 'link' in the chain.
+   
+10. By defining mod_second_model_output as mod_second_model(mod_first_model_output), we passed the first 'link's' output to the second 'link' in the chain, mod_second_model.
+   
+11. Defining the output of the second link in the chain as mod_second_model_output, allowed us to define the composite model, chained_model, as Model(inputs=mod_resnet_model.input, outputs=mod_custom_cnn_output).
+    
+12. Before training chained_model, we specified optimizer = Adam(), defined a filepath to save chained_model's best model, and defined equivalent EarlyStopping and ModelCheckpoint callbacks as we'd used previously. We trained chained_model on the dataset training_set and set validation_set as the validation_data.   
 
 
 ## Evaluating all four models
