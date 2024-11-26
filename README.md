@@ -9,16 +9,16 @@ What happens if we add to our model a pre-trained CNN model by employing transfe
 
 We defined, compiled, and trained two CNN submodels - one custom and one pre-trained - individually before ensembling and chaining them. We looked for a noticeable improvement in accuracy between the ensembled model and/or the chained model, over each of the two submodels.  
   
- a) the pre-trained ResNet50 model (model_one)   
- b) our custom CNN (model_two)  
- c) ensembling the output of model_one and model_two (ensemble_model)  
- d) chaining model_one and model_two into model_four (transfer learning)  
+ a) the pre-trained ResNet50 model (first_model)   
+ b) our custom CNN (second_model)  
+ c) ensembling the output of model_one and model_two with ensemble_model  
+ d) transfer learning: chaining first and second models, modified for compatabilty, into chained_model
 
 Concepts discussed:  
 Convolutional Neural Networks  
 Pretained models  
 Model Ensembling  
-Transfer Learning/model chaining  
+Transfer Learning/Model Chaining  
   
 The data for this project was obtained here: https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images  
 
@@ -119,14 +119,14 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
   
 Ensembling models entails combining the individual predictions of multiple models on the same dataset, in an attempt to make better predictions on that dataset. Ensemble models can improve upon the predictive performance of individual models. If different models make different types of errors, we may be able to reduce the overall error rate by combining their predictions. 
 
-In this project, we combined our two submodels' predictions in model_three, an ensemble model that averaged the submodels' output. Here, each model contributing to model_three wass weighted equally in the ensemmble model. It is possible to configure a weighted average ensemble in which better-performing submodels contribute more to the ensemble than poorer-performing submodels. 
+In this project, we combined our two submodels' predictions in ensemble_model, which averaged the submodels' output. Here, each model contributing to ensemble_model was weighted equally. It is possible to configure a weighted average ensemble in which better-performing submodels contribute more to the ensemble than poorer-performing submodels. 
 
 There are additional techniques for combining submodel predictions. In bootstrap aggregating, multiple models are trained on different subsets of the same training data and then ensembled. Boosting models occurs when models are trained sequentially, allowing later models to correct the errors made by earlier models. The voting technique makes a final prediction by taking a majority vote of the predictions made by the various submodels. 
 
 Ensemble models can yield improved accuracy over their individual submodels by reducing overfitting. They may exhibit more robustness to changes in input data than their submodels. On the other hand, ensemble models can entail increased complexity, reduced ease of interpretability, and greater computational costs than their submodels individually.    
   
   
-We took the following steps to prepare for and build the ensemble_mode:
+We took the following steps to prepare for and build the ensemble_model:
 
 1. Defined the full file paths to our best saved first_model and second_model, and loaded them from saved. keras.
    
@@ -140,16 +140,16 @@ We took the following steps to prepare for and build the ensemble_mode:
   
 4. Defined EarlyStopping and ModelCheckpoint callbacks and a filepath to save the best ensemble_model. 
   
-5. Built, compiled, and trained the ensemble_model, in the same manner as with the two submodels, to process the combined predictions.   
+5. Built, compiled, and trained the ensemble_model, in the same manner as the two submodels, to process the combined predictions.   
     * Defined ensemble_input_train as the simple average of the first_model's predictions on the training_set and the second_model's predictions on the training_set.
     * Defined ensemble_input_val as the simple average of the first_model's predictions on the validation_set and the second_model's predictions on the validation set.
     * Defined ensemble_input as the input layer for the ensemble_model, with Input(shape=(4,)) because
-        * The submodels output predictions of shape (None, 4), which ensemble_model takes as inputs  
+        * The submodels' outputs were predictions of shape (None, 4), which ensemble_model takes as inputs  
         * The ensemble_model does not take the image datasets fed to the submodels
     *  Added a Dense layer as the output layer, final_output = Dense(4, activation='softmax')(ensemble_input)
     * Defined ensemble_model as Model(inputs=ensemble_input, outputs = final_output)
     * Compiled ensemble_model with optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy']
-    * To train the ensemble_model, we used ensemble_input_train as our x and y_train - the true labels from our training_set as our true labels corresponding with the averaged training_set predictions.
+    * To train the ensemble_model, we used ensemble_input_train as our x and y_train - the true labels from our training_set - as our true labels.
     
       
 ## Transfer Learning   
@@ -159,11 +159,11 @@ An alternative to ensembling two models is chaining them. After pre-training, a 
   
 # Chaining Models  
 
-Chaining two models together means creating a composite model, where the first model's output becomes the input for the second model's layers. The output of the first model in a two-model chain is not a classification, but feature vectors that will help the second model's layers make a classification. Chaining two models results in a single model that can be trained end-to-end. Model chaining can be performed using the Functional API in a Keras framework, which allows for flexible connection of layers and models. 
+Chaining two models together means creating a composite model, where the first model's output becomes the input for the second model's layers. The output of the first model in a two-model chain is not a classification, but feature vectors that help the second model's layers make a classification. Chaining two models results in a single model that can be trained end-to-end. Model chaining can be performed using the Functional API in a Keras framework, which allows for flexible connection of layers and models. 
   
 The considerations we had to take into account when chaining model_one and model_two included:  
    
-1. We removed the final, dense layer from first_model because we didn't want it to generate a vector representing class probabilities. We wanted to use first_model only as a feature extractor, allowing second_model to generate the class probabilities.  
+1. Removing the final, dense layer from first_model because we didn't want it to generate a vector representing class probabilities. We wanted to use first_model only as a feature extractor, allowing second_model to generate the class probabilities.  
     * We defined a new output layer to serve as feature extraction, mod_first_model_output = x  
     * Thus, the final output of our modified first_model became the result of the Dropout layer, the layer immediately preceding the final output layer.  
     * We saved this modified version of first_model as mod_first_model  
@@ -195,24 +195,24 @@ possible degradation of learned features, as custom layers "over-process" the fe
     
 7. We defined but din't compile and train mod_first_model and mod_second_model, because we would chain them in the chained_model  DO WE END UP TRAINING THE TWO SUbmodels before we train the COMPOSITE MODEL???????
 
-8. In order to chain mod_first_model and mod_second_model
+8. In order to chain mod_first_model and mod_second_model, we
    
-   * We defined variable 'mod_first_model_output' to hold the feature vector output from 'mod_first_model'; mod_first_model_output = mod_first_model.output  
-   * We passed feature vector mod_first_model_output into mod_second_model, which would take the feature vector and process it further through its own layers
-   * We defined variable 'mod_second_model_output' to hold mod_second_model's output (classification probabilities) by setting mod_second_model_output = mod_second_model(mod_first_model_output)     
+   * Defined variable 'mod_first_model_output' to hold the feature vector output from 'mod_first_model'; mod_first_model_output = mod_first_model.output  
+   * Passed feature vector mod_first_model_output into mod_second_model, which would take the feature vector and process it further through its own layers
+   * Defined variable 'mod_second_model_output' to hold mod_second_model's output (classification probabilities) by setting mod_second_model_output = mod_second_model(mod_first_model_output)     
    * Defined a new Keras model called chained_model that chains together mod_first_model and mod_second_model into one model by
-       * setting chained_model = Model(inputs=mod_first_model.input, outputs=mod_second_model_output)
-       * where inputs=mod_first_model.input specifies that the input to chained_model is the same as the input to mod_first_model
-       * and where outputs=mod_second_model_output specifies that chained_model's output is taken from mod_second_model_output,
-       * which was the output of mod_second_model after the feature vector was passed from mod_first_model
+       * Setting chained_model = Model(inputs=mod_first_model.input, outputs=mod_second_model_output)
+       * Where inputs=mod_first_model.input specifies that the input to chained_model is the same as the input to mod_first_model, and
+       * Where outputs=mod_second_model_output specifies that chained_model's output is taken from mod_second_model_output,
+       * Which was the output of mod_second_model after the feature vector was passed from mod_first_model
 
-9. By defining mod_first_model_output as mod_first_model_model.output, we specified mod_first_model's layers as the first 'link' in the chain.
+9. Defined mod_first_model_output as mod_first_model_model.output, effectively making mod_first_model's layers the first 'link' in the chain.
    
-10. By defining mod_second_model_output as mod_second_model(mod_first_model_output), we passed the first 'link's' output to the second 'link' in the chain, mod_second_model.
+10. Definined mod_second_model_output as mod_second_model(mod_first_model_output), to pass the first 'link's' output to the second 'link' in the chain, mod_second_model.
    
-11. Defining the output of the second link in the chain as mod_second_model_output, allowed us to define the composite model, chained_model, as Model(inputs=mod_resnet_model.input, outputs=mod_custom_cnn_output).
+11. Defined the output of the second link in the chain as mod_second_model_output, allowing us to define the composite model, chained_model, as Model(inputs=mod_resnet_model.input, outputs=mod_custom_cnn_output).
     
-12. Before training chained_model, we specified optimizer = Adam(), defined a filepath to save chained_model's best model, and defined equivalent EarlyStopping and ModelCheckpoint callbacks as we'd used previously. We trained chained_model on the dataset training_set and set validation_set as the validation_data.   
+12. Specified optimizer = Adam(), defined a filepath to save chained_model's best model, and defined equivalent EarlyStopping and ModelCheckpoint callbacks as we'd used previously. We trained chained_model on the dataset training_set and set validation_set as the validation_data.   
 
 
 ## Evaluating all four models
