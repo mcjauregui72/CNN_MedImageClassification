@@ -3,7 +3,7 @@
 
 ## Executive Summary
 
-Can we train a custom convolutional neural network (CNN) model from scratch to classify CT chest scan images as indicating one of the following four categories (classes): Adenocarcinoma, Large cell carcinoma, Squamous cell carcinoma, or normal cells? How well does the model perform?
+Can we train a custom convolutional neural network (CNN) model from scratch to classify CT chest scan images as indicating one of the following four conditions: Adenocarcinoma, Large cell carcinoma, Squamous cell carcinoma, or normal cells? How well does the model perform?
   
 What happens if we add to our model a pre-trained CNN model by employing transfer learning and model ensembling? Will we see improved accuracy scores with either of these methods?
 
@@ -165,12 +165,11 @@ The considerations we had to take into account when chaining model_one and model
    
 1. Saving and renaming fist_model and second_model as mod_first_model and mod_second_model, because we'd need to make modifications to the original code.
  
-2. Removing the final, dense layer from first_model because we didn't want it to generate a vector representing class probabilities. We wanted to use first_model only as a feature extractor, allowing second_model to generate the class probabilities.  
+2. Removing the final, dense layer from mod_first_model because we didn't want it to generate a vector representing class probabilities. We wanted to use mod_first_model only as a feature extractor, allowing mod_second_model to generate the class probabilities.  
     * We defined a new output layer to serve as feature extraction, mod_first_model_output = x  
-    * Thus, the final output of our modified first_model became the result of the Dropout layer, the layer immediately preceding the final output layer.  
-    * We saved this modified version of first_model as mod_first_model  
+    * Thus, the final output of mod_first_model became the result of the Dropout layer, the layer immediately preceding the final output layer.  
       
-3. Because data augmentation and rescaling is necessary only in the first of two chained submodels, we removed augmentation and rescaling layers from second_model and saved and renamed it mod_second_model.  
+3. Because data augmentation and rescaling is necessary only in the first of two chained submodels, we removed augmentation and rescaling layers from mod_second_model.  
    
 4. Removing the dropout, convolutional, and pooling layers present in second_model from mod_second_model because such layers are already present in the ResNet50 base of mod_first_model. Not removing these custom layers risked: 
       
@@ -195,7 +194,7 @@ possible degradation of learned features, as custom layers "over-process" the fe
   
 6. Defining one Dense and one Dropout layer before defining an output layer capable of producing a four-class classification.  
     
-7. We defined but din't compile and train mod_first_model and mod_second_model, because we would chain them in the chained_model  DO WE END UP TRAINING THE TWO SUbmodels before we train the COMPOSITE MODEL???????
+7. We defined but didn't compile and train mod_first_model and mod_second_model, because we would train them as one chained model, chained_model.
 
 8. Chaining mod_first_model and mod_second_model by:
    
