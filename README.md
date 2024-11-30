@@ -221,19 +221,10 @@ possible degradation of learned features, as custom layers "over-process" the fe
 ## Evaluating all four models
 When it came to evaluating all four models, first_model and second_model (the submodels) needed to be evaluated on the unseen testing_set dataset to get unbiased performance metrics. 
 
-With first_model, second_model, and chained_model already trained on the training_set and validated on the validation_set, and the best versions of these models saved, we evaluated these three models on the testing_data with the following statements:
+With first_model, second_model, and chained_model already trained on the training_set and validated on the validation_set, we evaluated these three models on the testing_data.
 
-first_model_loss, first_model_accuracy = first_model.evaluate(testing_set)
-print(f"First model - Loss: {first_model_loss}, Accuracy: {first_model_accuracy}")
-
-second_model_loss, second_model_accuracy = second_model.evaluate(testing_set)
-print(f"Second model - Loss: {second_model_loss}, Accuracy: {second_model_accuracy}")
-
-chained_model_loss, chained_model_accuracy = first_model.evaluate(testing_set)
-print(f"Chained model - Loss: {chained_model_loss}, Accuracy: {chained_model_accuracy}")
-
-Evaluating the ensemble model was a matter of 
-a) averaging the predictions from the two submodels models on the unseen testing_set,  
+With the ensemble_model, evaluation was a matter of 
+a) averaging the predictions from the two submodels on the unseen testing_set,  
 b) extracting the labels from the testing_set, and   
 c) estimating ensemble loss and ensemble accuracy by requesting ensemble_model.evaluate(ensemble_predictions, y_test)
 
