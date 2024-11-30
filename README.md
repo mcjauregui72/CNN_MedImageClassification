@@ -238,10 +238,6 @@ b) extracting the labels from the testing_set, and
 c) estimating ensemble loss and ensemble accuracy by requesting ensemble_model.evaluate(ensemble_predictions, y_test)
 
 
-<img width="897" alt="Screenshot 31" src="https://github.com/user-attachments/assets/671b15de-1eb8-48b2-b493-ed34f330a754">
-<img width="902" alt="Screenshot 32" src="https://github.com/user-attachments/assets/6fd3212f-6ce8-4f7c-b133-d82cfdb1e2de">
-
-
 ## Table of results
 
 | model          |   train_loss  | train_accuracy |   val_loss   | val_accuracy |   test_loss   |  test_accuracy  |
