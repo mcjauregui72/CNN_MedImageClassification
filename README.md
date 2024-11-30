@@ -240,13 +240,26 @@ c) estimating ensemble loss and ensemble accuracy by requesting ensemble_model.e
   
   
 ## Model Performance Summaries  
+
+  first_model  
+  * Training performance: With high training accuracy and relatively low training loss, first_model learned well on the training dataset. 
+  * Validation performance: Moderate accuracy and higher loss on the validation set, compared to the training set, however, suggest overfitting. first_model performed better on the training data than on the unseen data.
+  * Testing performance: A further drop in accuracy and increase in loss with the testing data confirmed that first_model generalized poorly to new data.
+
+second_model  
+  * Training performance: second_model performed worse than first_model on the training data, suggesting second_model was not effective at learning complex patters. 
+  * Validation Performance: that validation accuracy exceeds training accuracy while validation loss is smaller than training loss indicated second_model overfit to a lesser degree than first_model.  
+  * Testing Performance: the significant drop in accuracy and increase in loss on the testing data suggested poor generalization on second-model's behalf, despite the improved validation results.
+
+ensemble_model  
+  * Training performance: Very low accuracy and high loss indicated underfitting; the ensemble_model failed to capture meaningful patterns in the training data.
+  * Validation performance: Similarly low validation accuracy, coupled with high validation loss, indicated the ensemble did not improve performance over either of the submodels. 
+  * Testing performance: Again, accuracy and validation scores confirm that the chosen ensemble strategy did not improve performance. Giving the two submodels equal weight when averaging their predictions was ineffective.  
   
-We see from the high training accuracy and relatively low training loss that first_model learned well on the training dataset. That the validation accuracy was significantly lower than training accuracy, and that validation loss was higher, indicates overfitting. first_model performed better on training data than on the unseen data. The testing accuracy and testing loss, worse than validation accuracy and loss, confirmed that overfitting persisted with the test set.
-  
-second_model performed worse than first_model on the training data, with both lower accuracy and higher loss. 
-The validation accuracy (76.39%) is identical to the training accuracy, suggesting this model has less overfitting than first_model.
-However, the testing accuracy (46.98%) drops significantly, with a much higher testing loss (1.57829). This indicates poor generalization to unseen data.
-Performance of ensemble_model:
+chained_model  
+Training performance: Training accuracy and testing loss indicated the chained_model exhibited a reasonable learning process.
+Validation performance: That validation accuracy was lower than training accuracy, while validation loss was worse suggested some overfitting in the chained_model.
+Testing performance: Because testing accuracy was higher, and loss lower, than with first_model and second_model, generalization to unseen data was improved.
 
 Both training accuracy (25.77%) and validation accuracy (23.61%) are extremely low, with very high losses in all datasets.
 This indicates that the ensemble model is underfitting the data significantly, failing to capture patterns in both the training and validation datasets.
