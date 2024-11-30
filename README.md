@@ -1,4 +1,4 @@
-# Medical Image Classification with Convolutional Neural Networks: Two Functional Models (Pretrained and Custom) Evaluated Individually, as an Ensemble, and Chained
+# Medical Image Classification with Convolutional Neural Networks: Pre-trained and Custom Model Evaluated Individually, as an Ensemble, and Chained
 
 
 ## Executive Summary
