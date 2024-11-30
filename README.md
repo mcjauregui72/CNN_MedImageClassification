@@ -16,7 +16,7 @@ We defined, compiled, and trained two CNN submodels - one custom and one pre-tra
 
 Concepts discussed:  
 Convolutional Neural Networks  
-Pretained models  
+Pre-trained models  
 Model Ensembling  
 Transfer Learning/Model Chaining  
   
@@ -46,7 +46,7 @@ We built our custom CNN (model_two) and our ResNet50-based pre-trained model wit
 7. Output Layer: We chose a softmax function capable of outputting probabilities for each of the four classes, indicating the network's prediction of Adenocarcinoma, Large cell carcinoma, Squamous cell carcinoma, or normal cells.   
     
  
-## Pretrained Models
+## Pre-trained Models
 
 Pre-training a neural network involves training a model on a large, broad, general-purpose dataset before fine-tuning it on a specific task (a new set of specific, likely previously unseen data). The ResNet50 model is a well-known model that was trained on the ImageNet database, a collection of millions of images classified across thousands of categories.   
 
@@ -115,7 +115,7 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
 15. Trained both submodels with identical EarlyStopping and ModelCheckpoint callbacks. 
   
   
-### Model Ensembling  
+## Model Ensembling  
   
 Ensembling models entails combining the individual predictions of multiple models on the same dataset, in an attempt to make better predictions on that dataset. Ensemble models can improve upon the predictive performance of individual models. If different models make different types of errors, we may be able to reduce the overall error rate by combining their predictions. 
 
@@ -157,7 +157,7 @@ We took the following steps to prepare for and build the ensemble_model:
 An alternative to ensembling two models is chaining them. After pre-training, a model can be applied to a new, specific dataset and classification task, in a process called transfer learning. The pre-trained model's weights, optimized during pre-training, become the starting point for training on a new, often smaller, dataset. The model learns the specifics of the new task while leveraging the general features it learned during pre-training. In our project, the smaller dataset consisted of the CT-Scan images with different types of chest cancer versus normal cells. 
   
   
-# Chaining Models  
+## Chaining Models  
 
 Chaining two models together means creating a composite model, where the first model's output becomes the input for the second model's layers. The output of the first model in a two-model chain is not a classification, but feature vectors that help the second model's layers make a classification. Chaining two models results in a single model that can be trained end-to-end. Model chaining can be performed using the Functional API in a Keras framework, which allows for flexible connection of layers and models. 
   
@@ -218,7 +218,7 @@ possible degradation of learned features, as custom layers "over-process" the fe
 13. Training chained_model on the dataset training_set and setting validation_set as the validation_data.   
 
 
-## Evaluating all four models
+### Evaluating all four models
 When it came to evaluating all four models, first_model and second_model (the submodels) needed to be evaluated on the unseen testing_set dataset to get unbiased performance metrics. 
 
 With first_model, second_model, and chained_model already trained on the training_set and validated on the validation_set, we evaluated these three models on the testing_data.
