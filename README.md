@@ -234,9 +234,43 @@ c) estimating ensemble loss and ensemble accuracy by requesting ensemble_model.e
 | Model          | Training Loss | Training Accuracy | Validation Loss | Validation Accuracy | Testing Loss | Testing Accuracy |
 |----------------|---------------|----------------|--------------|--------------|---------------|-----------------|
 | first_model    | 0.43760 | 0.82218 | 1.02789 | 0.65277 | 1.17074 | 0.51428 | 
-| second_model   | 0.57289 | 0.76388 | 0.72737 | 0.76388 | 1.57829 | 0.46984 |
+| second_model   | 0.57289 | 0.74388 | 0.72737 | 0.76388 | 1.57829 | 0.46984 |
 | ensemble_model | 1.38222 | 0.25774 | 1.40016 | 0.23611 | 1.4087 | 0.2444 |
 | chained_model  | 0.53855 | 0.77487 | 0.95534 | 0.63888 | 0.95621 | 0.56825 |
+  
+  
+## Model Performance Summaries  
+  
+We see from the high training accuracy and relatively low training loss that first_model learned well on the training dataset. That the validation accuracy was significantly lower than training accuracy, and that validation loss was higher, indicates overfitting. first_model performed better on training data than on the unseen data. The testing accuracy and testing loss, worse than validation accuracy and loss, confirmed that overfitting persisted with the test set.
+  
+second_model performed worse than first_model on the training data, with both lower accuracy and higher loss. 
+The validation accuracy (76.39%) is identical to the training accuracy, suggesting this model has less overfitting than first_model.
+However, the testing accuracy (46.98%) drops significantly, with a much higher testing loss (1.57829). This indicates poor generalization to unseen data.
+Performance of ensemble_model:
+
+Both training accuracy (25.77%) and validation accuracy (23.61%) are extremely low, with very high losses in all datasets.
+This indicates that the ensemble model is underfitting the data significantly, failing to capture patterns in both the training and validation datasets.
+The testing accuracy (24.44%) and testing loss (1.4087) are similarly poor, showing no improvement over the individual models.
+Performance of chained_model:
+
+The training accuracy (77.49%) and training loss (0.53855) indicate decent learning on the training data.
+The validation accuracy (63.89%) is slightly lower than the training accuracy, with comparable loss values. This suggests mild overfitting.
+The testing accuracy (56.83%) and testing loss (0.95621) are higher than both first_model and second_model, showing that chained_model generalizes better than the individual models.
+Conclusions:
+Best Model:
+
+The chained_model is the best-performing model overall, with a reasonable balance of training, validation, and testing performance, indicating that it generalizes better to unseen data compared to the other models.
+Issues with Ensemble:
+
+The ensemble_model is significantly underperforming, likely due to poor integration of the individual model predictions or improper weighting of their contributions.
+Recommendations:
+
+Address overfitting in first_model (e.g., using regularization, data augmentation, or more diverse training data).
+Investigate why second_model performs poorly on the test set despite good validation accuracy.
+Revisit the architecture and weighting strategy of ensemble_model to improve its performance.
+
+
+
 
 
 We noted some unexpected results when combining the two models. Neither the ensemble_model nor the chained_model outperformed the first_model (the ResNet50-based classifier). The accuracy results for the ensemble_model were especially low, when compared with the two submodels.
