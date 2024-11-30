@@ -163,14 +163,16 @@ Chaining two models together means creating a composite model, where the first m
   
 The considerations we had to take into account when chaining model_one and model_two included:  
    
-1. Removing the final, dense layer from first_model because we didn't want it to generate a vector representing class probabilities. We wanted to use first_model only as a feature extractor, allowing second_model to generate the class probabilities.  
+1. Saving and renaming fist_model and second_model as mod_first_model and mod_second_model, because we'd need to make modifications to the original code.
+ 
+2. Removing the final, dense layer from first_model because we didn't want it to generate a vector representing class probabilities. We wanted to use first_model only as a feature extractor, allowing second_model to generate the class probabilities.  
     * We defined a new output layer to serve as feature extraction, mod_first_model_output = x  
     * Thus, the final output of our modified first_model became the result of the Dropout layer, the layer immediately preceding the final output layer.  
     * We saved this modified version of first_model as mod_first_model  
       
-2. Because data augmentation and rescaling is necessary only in the first of two chained submodels, we removed augmentation and rescaling layers from second_model and saved and renamed it mod_second_model.  
+3. Because data augmentation and rescaling is necessary only in the first of two chained submodels, we removed augmentation and rescaling layers from second_model and saved and renamed it mod_second_model.  
    
-3. Removing the dropout, convolutional, and pooling layers present in second_model from mod_second_model because such layers are already present in the ResNet50 base of mod_first_model. Not removing these custom layers risked: 
+4. Removing the dropout, convolutional, and pooling layers present in second_model from mod_second_model because such layers are already present in the ResNet50 base of mod_first_model. Not removing these custom layers risked: 
       
    * Over-Parameterization, which could have resulted in a model with too many parameters. Over-Parameterized models  
       * Have an increased risk of overfitting, especially on small datasets
