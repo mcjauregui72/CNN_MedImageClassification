@@ -257,9 +257,24 @@ ensemble_model
   * Testing performance: Again, accuracy and validation scores confirm that the chosen ensemble strategy did not improve performance. Giving the two submodels equal weight when averaging their predictions was ineffective.  
   
 chained_model  
-Training performance: Training accuracy and testing loss indicated the chained_model exhibited a reasonable learning process.
-Validation performance: That validation accuracy was lower than training accuracy, while validation loss was worse suggested some overfitting in the chained_model.
-Testing performance: Because testing accuracy was higher, and loss lower, than with first_model and second_model, generalization to unseen data was improved.
+  * Training performance: Training accuracy and testing loss indicated the chained_model exhibited a reasonable learning process.
+  * Validation performance: That validation accuracy was lower than training accuracy, while validation loss was worse than training loss, suggested some overfitting in the chained_model.
+  * Testing performance: Because testing accuracy was higher, and loss lower, than with first_model and second_model, generalization to unseen data was improved.
+
+
+Best Overall Model:
+
+The chained_model demonstrates the best balance between training, validation, and testing performance, making it the most effective model in this comparison.
+Issues with Individual Models:
+
+The first_model suffers from overfitting, performing poorly on validation and testing data despite good training results.
+The second_model generalizes slightly better on validation data but fails on the test set, possibly due to insufficient capacity to learn complex patterns.
+Ensemble Model Failure:
+
+The ensemble_model is ineffective, underperforming all other models. This suggests issues with how the predictions from first_model and second_model are combined or weighted.
+
+
+
 
 Both training accuracy (25.77%) and validation accuracy (23.61%) are extremely low, with very high losses in all datasets.
 This indicates that the ensemble model is underfitting the data significantly, failing to capture patterns in both the training and validation datasets.
