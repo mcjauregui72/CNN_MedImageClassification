@@ -9,8 +9,8 @@ What happens if we add to our model a pre-trained CNN model by employing transfe
 
 We defined, compiled, and trained two CNN submodels - one custom and one pre-trained - individually before ensembling and chaining them. We looked for a noticeable improvement in accuracy between the ensembled model and/or the chained model, over each of the two submodels.  
   
- a) the pre-trained ResNet50 model (first_model)   
- b) our custom CNN (second_model)  
+ a) the pre-trained ResNet50-based model (first_model)   
+ b) the custom CNN (second_model)  
  c) ensembling the output of model_one and model_two with ensemble_model  
  d) transfer learning: chaining first and second models, modified for compatabilty, into chained_model
 
@@ -231,12 +231,13 @@ c) estimating ensemble loss and ensemble accuracy by requesting ensemble_model.e
 
 ## Table of results
 
-| model          |   train_loss  | train_accuracy |   val_loss   | val_accuracy |   test_loss   |  test_accuracy  |
+| Model          | Training Loss | Training Accuracy | Validation Loss | Validation Accuracy | Testing Loss | Testing Accuracy |
 |----------------|---------------|----------------|--------------|--------------|---------------|-----------------|
-| first_model    | 0.6271 | 0.7406 | 1.009 | 0.6250 | 1.0288 | 0.5301 | 
-| second_model   | 0.4488 | 0.8189 | 0.6815 |  0.8194 | 2.9589 | 0.3746 |
-| ensemble_model | 1.4364 | 0.2120 | 1.4026 | 0.2777 | 1.4087 |  0.2444 |
-| chained_model  | 0.8707 | 0.6215 | 0.9116 | 0.5833 | 1.0094 |  0.5142 |
+| first_model    | 0.43760 | 0.82218 | 1.02789 | 0.65277 | 1.17074 | 0.51428 | 
+| second_model   | 0.57289 | 0.76388 | 0.72737 | 0.76388 | 1.57829 | 0.46984 |
+| ensemble_model | 1.38222 | 0.25774 | 1.40016 | 0.23611 | 1.4087 | 0.2444 |
+| chained_model  | 0.53855 | 0.77487 | 0.95534 | 0.63888 | 0.95621 | 0.56825 |
+
 
 We noted some unexpected results when combining the two models. Neither the ensemble_model nor the chained_model outperformed the first_model (the ResNet50-based classifier). The accuracy results for the ensemble_model were especially low, when compared with the two submodels.
 
