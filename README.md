@@ -254,7 +254,15 @@ Model loss is a numerical value that represents the difference between predicted
   
 ### Model Balance
   
-A model's Balance Score is calculated as 1 - Max Gap, where Max Gap is the largest absolute value difference between a model's training, validation, and testing accuracies: max_gap = max(abs(training accuracy - validation accuracy), abs(validation accuracy - testing accuracy), abs(training accuracy - testing accuracy)). The Balance Score measures consistency in a model's accuracy across training, validation, and testing. Balance Score is calculated to keep the model from overfitting or underfitting. A balanced model is one that performs consistently across datasets. 
+A model's Balance Score is calculated as 1 - Max Gap, where Max Gap is the largest absolute value difference between a model's training, validation, and testing accuracies: max_gap = max(abs(training accuracy - validation accuracy), abs(validation accuracy - testing accuracy), abs(training accuracy - testing accuracy)).   
+The Balance Score measures consistency in a model's accuracy across training, validation, and testing. The more balanced the model, the more consistenlty it performs across datasets. Balanced models are more likely to perform well on new, unseen data than unbalanced models, making them more useful.
+  
+When balance is good, the model's performance metrics (accuracy, loss) across training, validation, and testing datasets are both:
+   a. Similar, exhibiting small gaps between datasets, indicating reasonable generalization, and
+   b. Consistent, with validation and testing results not significantly better nor worse than training results
+  
+When balance is poor, the model overfits to the training data and performs significantly worse on unseen data. The Balance Score is intended to keep the model from overfitting (memorizing training data but failing on unseen data) and underfitting (failing to learn meaningful patters from the data). Poorly balanced models are not robust, but very senstive to variations in data. With strong balance, a model produces consistent and reliable results across datasets, making it effective and reliable.  
+  
   
 ### Model Average Accuracy
   
@@ -273,10 +281,8 @@ With the ensemble_model, evaluation was a matter of
 a) averaging the predictions from the two submodels on the unseen testing_set,  
 b) extracting the labels from the testing_set, and   
 c) estimating ensemble loss and ensemble accuracy by requesting ensemble_model.evaluate(ensemble_predictions, y_test)
-
-
-
-
+  
+  
 ## Tables of results
 
 | Model          |   Train Loss |   Train Accuracy |   Validation Loss |   Validation Accuracy |   Test Loss |   Test Accuracy |
@@ -321,20 +327,7 @@ chained_model
   * Testing performance: Because accuracy was higher, and loss lower, than with first_model and second_model, chained_model exhibited better generalization to unseen data than the submodels.
   * Conclusion: chained_model achieved the best generalization, balancing training, validation, and testing performance among all four models. 
 
-When a model achieves balance, the performance metrics (e.g., accuracy, loss) across training, validation, and testing datasets are:
-Similar: The gaps between the datasets are small.
-Consistent: Validation and testing results are neither significantly better nor worse than training
-  gaps between metrics are not extreme, indicating reasonable generalization
 
-Poor balance:  The model is overfitting to the training data, with large drops in performance on unseen data
-
-  Why Is Balance Important?
-Indicates Generalization: A balanced model is likely to perform well on new, unseen data, making it more useful in real-world applications.
-Prevents Overfitting/Underfitting:
-Overfitting: The model memorizes training data but fails on unseen data.
-Underfitting: The model fails to learn meaningful patterns from the data.
-Reflects Robustness: Balanced performance ensures the model is not overly sensitive to variations in the data.
-By ensuring balance, the model can achieve consistent and reliable results across different datasets, making it effective and trustworthy.
   
 The chained_model demonstrates the best balance between training, validation, and testing performance, making it the most effective model in this comparison.
 
