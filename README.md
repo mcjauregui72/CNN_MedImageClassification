@@ -248,7 +248,7 @@ b) extracting the labels from the testing_set, and
 c) estimating ensemble loss and ensemble accuracy by requesting ensemble_model.evaluate(ensemble_predictions, y_test)
 
 
-## Table of results
+## Tables of results
 
 | Model          |   Train Loss |   Train Accuracy |   Validation Loss |   Validation Accuracy |   Test Loss |   Test Accuracy |
 |:---------------|-------------:|-----------------:|------------------:|----------------------:|------------:|----------------:|
@@ -256,8 +256,14 @@ c) estimating ensemble loss and ensemble accuracy by requesting ensemble_model.e
 | second_model   |     0.572898 |         0.743883 |          0.727373 |              0.763889 |    1.57829  |        0.469841 |
 | ensemble_model |     1.38543  |         0.257749 |          1.44298  |              0.222222 |    1.38834  |        0.234921 |
 | chained_model  |     0.538555 |         0.774878 |          0.95535  |              0.638889 |    0.956217 |        0.568254 |
-
-
+  
+    
+| Model          |   Balance Score |   Average Accuracy |   Composite Score |  
+|:---------------|----------------:|-------------------:|------------------:|  
+| first_model    |        0.6921   |           0.663083 |          0.677591 |  
+| second_model   |        0.705952 |           0.659204 |          0.682578 |  
+| ensemble_model |        0.964473 |           0.238297 |          0.601385 |  
+| chained_model  |        0.793376 |           0.660674 |          0.727025 |  
   
   
 ## Model Performance Summaries  
