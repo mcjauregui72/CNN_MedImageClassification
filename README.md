@@ -13,13 +13,25 @@ We defined, compiled, and trained two CNN submodels - one custom and one pre-tra
  b) the custom CNN (second_model)  
  c) ensembling the output of model_one and model_two with ensemble_model  
  d) transfer learning: chaining first and second models, modified for compatabilty, into chained_model
+ e) balance score
+ f) average accuracy score
+ g) composite score
 
-| Model          |   Train Loss |   Train Accuracy |   Validation Loss |   Validation Accuracy |   Test Loss |   Test Accuracy |
-|:---------------|-------------:|-----------------:|------------------:|----------------------:|------------:|----------------:|
-| first_model    |     0.437609 |         0.822186 |          1.02791  |              0.652778 |    1.17075  |        0.514286 |
-| second_model   |     0.572898 |         0.743883 |          0.727373 |              0.763889 |    1.57829  |        0.469841 |
-| ensemble_model |     1.38543  |         0.257749 |          1.44298  |              0.222222 |    1.38834  |        0.234921 |
-| chained_model  |     0.538555 |         0.774878 |          0.95535  |              0.638889 |    0.956217 |        0.568254 |
+| Model          |   Train Loss |   Train Accuracy |   Validation Loss |   Validation Accuracy |   Test Loss |   Test Accuracy |  
+|:---------------|-------------:|-----------------:|------------------:|----------------------:|------------:|----------------:|  
+| first_model    |     0.437609 |         0.822186 |          1.02791  |              0.652778 |    1.17075  |        0.514286 |  
+| second_model   |     0.572898 |         0.743883 |          0.727373 |              0.763889 |    1.57829  |        0.469841 |  
+| ensemble_model |     1.38543  |         0.257749 |          1.44298  |              0.222222 |    1.38834  |        0.234921 |  
+| chained_model  |     0.538555 |         0.774878 |          0.95535  |              0.638889 |    0.956217 |        0.568254 |  
+  
+  
+| Model          |   Balance Score |   Average Accuracy |   Composite Score |  
+|:---------------|----------------:|-------------------:|------------------:|  
+| first_model    |        0.6921   |           0.663083 |          0.677591 |  
+| second_model   |        0.705952 |           0.659204 |          0.682578 |  
+| ensemble_model |        0.964473 |           0.238297 |          0.601385 |  
+| chained_model  |        0.793376 |           0.660674 |          0.727025 |  
+
 
 Concepts discussed:  
 Convolutional Neural Networks  
