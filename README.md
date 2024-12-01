@@ -242,7 +242,7 @@ possible degradation of learned features, as custom layers "over-process" the fe
 
 ## Terms Describing Model Performance  
 
-The following metrics, when used together, provide a comprehensive evaluation of a model’s performance. That is, they communicate how accurate, consistent, and well-suited for generalization is any given model.
+The following metrics, when used together, provide a comprehensive evaluation of a model’s performance. That is, they communicate how accurate, consistent, and well-suited for generalization any given model is for a task.
   
 ### Model Accuracy
 
@@ -256,7 +256,6 @@ Model loss is a numerical value that represents the difference between predicted
   
 A model's Balance Score is calculated as 1 - Max Gap, where Max Gap is the largest absolute value difference between a model's training, validation, and testing accuracies: max_gap = max(abs(training accuracy - validation accuracy), abs(validation accuracy - testing accuracy), abs(training accuracy - testing accuracy)). The Balance Score measures consistency in a model's accuracy across training, validation, and testing. Balance Score is calculated to keep the model from overfitting or underfitting. A balanced model is one that performs consistently across datasets. 
   
-  
 ### Model Average Accuracy
   
 A model's Average Acuracy Score is the mean of the model's training accuracy, validation accuray, and testing accuray values. The Average Accuracy Score indicates how well a model is performing across all three datasets, providing a measure of absolute performance. 
@@ -264,32 +263,11 @@ A model's Average Acuracy Score is the mean of the model's training accuracy, va
 ### Model Composite Score
   
 A model's Composite Score is a weighted combination of its Balance and Average Accuracy Scores: Composite Score = w1 × Balance Score + w2 × Average Accuracy, where w1 and w2 are weights assigend to the component scores, respectively. Because it measures consistency and absolute accuracy, its regarded as an indication of a model's overall performance. Composite Score is a single metric that considers both the importance of model stability (balance) and the importance of overall performance (accuracy). 
-
-
-
-
-
-
   
-### Model Loss  
-
-
-### Model Accuracy  
-
-
-### Model Balance Score  
-
-
-### Model Average Accuracy Score  
-
-
-## Model Composite Score   
-   
   
-### Evaluating all four models
-When it came to evaluating all four models, first_model and second_model (the submodels) needed to be evaluated on the unseen testing_set dataset to get unbiased performance metrics. 
-
-With first_model, second_model, and chained_model already trained on the training_set and validated on the validation_set, we evaluated these three models on the testing_data.
+## Evaluating all four models
+  
+When it came to evaluating all four models, first_model and second_model (the submodels) needed to be evaluated on the unseen testing_set dataset to get unbiased performance metrics. With first_model, second_model, and chained_model already trained on the training_set and validated on the validation_set, we evaluated these three models on the testing_data.
 
 With the ensemble_model, evaluation was a matter of 
 a) averaging the predictions from the two submodels on the unseen testing_set,  
