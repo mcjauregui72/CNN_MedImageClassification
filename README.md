@@ -14,6 +14,13 @@ We defined, compiled, and trained two CNN submodels - one custom and one pre-tra
  c) ensembling the output of model_one and model_two with ensemble_model  
  d) transfer learning: chaining first and second models, modified for compatabilty, into chained_model
 
+| Model          |   Train Loss |   Train Accuracy |   Validation Loss |   Validation Accuracy |   Test Loss |   Test Accuracy |
+|:---------------|-------------:|-----------------:|------------------:|----------------------:|------------:|----------------:|
+| first_model    |     0.437609 |         0.822186 |          1.02791  |              0.652778 |    1.17075  |        0.514286 |
+| second_model   |     0.572898 |         0.743883 |          0.727373 |              0.763889 |    1.57829  |        0.469841 |
+| ensemble_model |     1.38543  |         0.257749 |          1.44298  |              0.222222 |    1.38838  |        0.257143 |
+| chained_model  |     0.538555 |         0.774878 |          0.95535  |              0.638889 |    0.956217 |        0.568254 |
+
 Concepts discussed:  
 Convolutional Neural Networks  
 Pre-trained models  
@@ -231,12 +238,12 @@ c) estimating ensemble loss and ensemble accuracy by requesting ensemble_model.e
 
 ## Table of results
 
-| Model          | Training Loss | Training Accuracy | Validation Loss | Validation Accuracy | Testing Loss | Testing Accuracy |
-|----------------|---------------|----------------|--------------|--------------|---------------|-----------------|
-| first_model    | 0.43760 | 0.82218 | 1.02789 | 0.65277 | 1.17074 | 0.51428 | 
-| second_model   | 0.57289 | 0.74388 | 0.72737 | 0.76388 | 1.57829 | 0.46984 |
-| ensemble_model | 1.38222 | 0.25774 | 1.40016 | 0.23611 | 1.4087 | 0.2444 |
-| chained_model  | 0.53855 | 0.77487 | 0.95534 | 0.63888 | 0.95621 | 0.56825 |
+| Model          |   Train Loss |   Train Accuracy |   Validation Loss |   Validation Accuracy |   Test Loss |   Test Accuracy |
+|:---------------|-------------:|-----------------:|------------------:|----------------------:|------------:|----------------:|
+| first_model    |     0.437609 |         0.822186 |          1.02791  |              0.652778 |    1.17075  |        0.514286 |
+| second_model   |     0.572898 |         0.743883 |          0.727373 |              0.763889 |    1.57829  |        0.469841 |
+| ensemble_model |     1.38543  |         0.257749 |          1.44298  |              0.222222 |    1.38838  |        0.257143 |
+| chained_model  |     0.538555 |         0.774878 |          0.95535  |              0.638889 |    0.956217 |        0.568254 |
   
   
 ## Model Performance Summaries  
