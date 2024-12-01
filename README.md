@@ -241,10 +241,12 @@ possible degradation of learned features, as custom layers "over-process" the fe
 
 
 ## Terms Describing Model Performance  
+
+The following metrics, when used together, provide a comprehensive evaluation of a model’s performance. That is, they communicate how accurate, consistent, and well-suited for generalization is any given model.
   
 ### Model Accuracy
 
-Model accuracy is calculated as the number of correctly classified predictions divided by the total number of predictions. It's purpose is to indicate how well the model performs overall, but it does not take into account any costs related to misclassifications or class imbalance. 
+Model accuracy is calculated as the number of correctly classified predictions divided by the total number of predictions. It indicates how well the model performs overall, but it does not take into account any costs related to misclassifications or class imbalance. 
  
 ### Model Loss
 
@@ -261,25 +263,7 @@ A model's Average Acuracy Score is the mean of the model's training accuracy, va
     
 ### Model Composite Score
   
-The Composite Score for a model is a weighted combination of its Balance Score and Average Accuracy Score. Because it measures consistency and absolute accuracy, its regarded as an indication of a model's overall performance. 
-Balance Score
-
-
-=
-𝑤
-1
-×
-Balance Score
-+
-𝑤
-2
-×
-Average Accuracy
-Composite Score = w1 × Balance Score + w2 × Average Accuracy
-Where w1 and 𝑤2 are weights assigned to balance score and average accuracy, respectively.
-Purpose:
-Provides a single metric that balances the importance of model stability (balance) and overall performance (accuracy).
-These metrics, used together, provide a comprehensive evaluation of a model’s performance, ensuring it is accurate, consistent, and well-suited for generalization.
+A model's Composite Score is a weighted combination of its Balance and Average Accuracy Scores: Composite Score = w1 × Balance Score + w2 × Average Accuracy, where w1 and w2 are weights assigend to the component scores, respectively. Because it measures consistency and absolute accuracy, its regarded as an indication of a model's overall performance. Composite Score is a single metric that considers both the importance of model stability (balance) and the importance of overall performance (accuracy). 
 
 
 
