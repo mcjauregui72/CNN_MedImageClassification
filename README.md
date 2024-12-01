@@ -13,9 +13,11 @@ We defined, compiled, and trained two CNN submodels - one custom and one pre-tra
  b) the custom CNN (second_model)  
  c) ensembling the output of model_one and model_two with ensemble_model  
  d) transfer learning: chaining first and second models, modified for compatabilty, into chained_model
- e) balance score
- f) average accuracy score
- g) composite score
+ e) Model Loss
+ f) Model Accuracy
+ e) Model Balance Score
+ f) Model Average Accuracy Score
+ g) Model Composite Score
 
 | Model          |   Train Loss |   Train Accuracy |   Validation Loss |   Validation Accuracy |   Test Loss |   Test Accuracy |  
 |:---------------|-------------:|-----------------:|------------------:|----------------------:|------------:|----------------:|  
@@ -237,6 +239,12 @@ possible degradation of learned features, as custom layers "over-process" the fe
 13. Training chained_model on the dataset training_set and setting validation_set as the validation_data.   
 
 
+ balance score
+ average accuracy score
+ composite score
+
+
+
 ### Evaluating all four models
 When it came to evaluating all four models, first_model and second_model (the submodels) needed to be evaluated on the unseen testing_set dataset to get unbiased performance metrics. 
 
@@ -246,6 +254,8 @@ With the ensemble_model, evaluation was a matter of
 a) averaging the predictions from the two submodels on the unseen testing_set,  
 b) extracting the labels from the testing_set, and   
 c) estimating ensemble loss and ensemble accuracy by requesting ensemble_model.evaluate(ensemble_predictions, y_test)
+
+
 
 
 ## Tables of results
