@@ -13,11 +13,7 @@ We defined, compiled, and trained two CNN submodels - one custom and one pre-tra
  b) the custom CNN (second_model)  
  c) ensembling the output of model_one and model_two with ensemble_model  
  d) transfer learning: chaining first and second models, modified for compatabilty, into chained_model
- e) Model Loss
- f) Model Accuracy
- e) Model Balance Score
- f) Model Average Accuracy Score
- g) Model Composite Score
+
 
 | Model          |   Train Loss |   Train Accuracy |   Validation Loss |   Validation Accuracy |   Test Loss |   Test Accuracy |  
 |:---------------|-------------:|-----------------:|------------------:|----------------------:|------------:|----------------:|  
@@ -40,6 +36,11 @@ Convolutional Neural Networks
 Pre-trained models  
 Model Ensembling  
 Transfer Learning/Model Chaining  
+Model Loss
+Model Accuracy
+Model Balance Score
+Model Average Accuracy Score
+Model Composite Score
   
 The data for this project was obtained here: https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images  
 
@@ -239,12 +240,68 @@ possible degradation of learned features, as custom layers "over-process" the fe
 13. Training chained_model on the dataset training_set and setting validation_set as the validation_data.   
 
 
- balance score
- average accuracy score
- composite score
+## Terms Describing Model Performance  
+  
+### Model Accuracy
+
+Model accuracy is calculated as the number of correctly classified predictions divided by the total number of predictions. It's purpose is to indicate how well the model performs overall, but it does not take into account any costs related to misclassifications or class imbalance. 
+ 
+### Model Loss
+
+Model loss is a numerical value that represents the difference between predicted values and actual values. It can be calculated in various ways, using such loss functions desgined for classfication tasks as categorical_crossentropy or sparse_categorical_crossentropy. Loss plays an important role in a model's straining process, adjusting weights and minimizing errors. 
+  
+### Model Balance
+  
+A model's Balance Score is calculated as 1 - Max Gap, where Max Gap is the largest absolute value difference between a model's training, validation, and testing accuracies: max_gap = max(abs(training accuracy - validation accuracy), abs(validation accuracy - testing accuracy), abs(training accuracy - testing accuracy)). The Balance Score measures consistency in a model's accuracy across training, validation, and testing. Balance Score is calculated to keep the model from overfitting or underfitting. A balanced model is one that performs consistently across datasets. 
+  
+  
+### Model Average Accuracy
+  
+A model's Average Acuracy Score is the mean of the model's training accuracy, validation accuray, and testing accuray values. The Average Accuracy Score indicates how well a model is performing across all three datasets, providing a measure of absolute performance. 
+    
+### Model Composite Score
+  
+The Composite Score for a model is a weighted combination of its Balance Score and Average Accuracy Score. Because it measures consistency and absolute accuracy, its regarded as an indication of a model's overall performance. 
+Balance Score
+
+
+=
+𝑤
+1
+×
+Balance Score
++
+𝑤
+2
+×
+Average Accuracy
+Composite Score = w1 × Balance Score + w2 × Average Accuracy
+Where w1 and 𝑤2 are weights assigned to balance score and average accuracy, respectively.
+Purpose:
+Provides a single metric that balances the importance of model stability (balance) and overall performance (accuracy).
+These metrics, used together, provide a comprehensive evaluation of a model’s performance, ensuring it is accurate, consistent, and well-suited for generalization.
 
 
 
+
+
+
+  
+### Model Loss  
+
+
+### Model Accuracy  
+
+
+### Model Balance Score  
+
+
+### Model Average Accuracy Score  
+
+
+## Model Composite Score   
+   
+  
 ### Evaluating all four models
 When it came to evaluating all four models, first_model and second_model (the submodels) needed to be evaluated on the unseen testing_set dataset to get unbiased performance metrics. 
 
