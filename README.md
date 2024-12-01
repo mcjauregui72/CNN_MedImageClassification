@@ -271,8 +271,8 @@ ensemble_model
 chained_model  
   * Training performance: Moderate accuracy and loss scores indicated a well-trained model with a good learning process and limited overfitting.  
   * Validation performance: lower accuracy than training accuracy, with more loss than training loss, suggested some overfitting on the validation data.  
-  * Testing performance: Because accuracy was higher, and loss lower, than with first_model and second_model, chained_model exhibited better generalization to unseen data than the submodels.  
-Conclusion: chained_model achieved the best generalization, balancing training, validation, and testing performance among all four models. 
+  * Testing performance: Because accuracy was higher, and loss lower, than with first_model and second_model, chained_model exhibited better generalization to unseen data than the submodels.
+  * Conclusion: chained_model achieved the best generalization, balancing training, validation, and testing performance among all four models. 
 
 When a model achieves balance, the performance metrics (e.g., accuracy, loss) across training, validation, and testing datasets are:
 Similar: The gaps between the datasets are small.
