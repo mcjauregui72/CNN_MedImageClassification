@@ -7,6 +7,17 @@ Can we train a custom convolutional neural network (CNN) model from scratch to c
   
 What happens if we add to our model a pre-trained CNN model by employing transfer learning and model ensembling? Will we see improved accuracy scores with either of these methods?
 
+## Project Overview
+
+The data for this project was obtained at: https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images. Images reveal the presence of one of three chest carcinomas or the presence of healthy cells. The models' tasks are thus to classify each image as an one of the following four outcomes: adenocarcinoma, large cell carcinoma, squamous cell carcinoma, or healthy cells. All images were divided into training (613), testing (315), and validation (72) sets containing four types of images. 
+
+We trained two convolutional neural network (CNN) models to classify CT chest scan images as either normal or showing one of three forms of cancer. We investigated the benefit of using a pre-trained CNN model on the same dataset by employing transfer learning and model ensembling.
+
+CNNs use convolutional and pooling layers to automatically and hierarchically learn features from images, followed by fully connected layers to classify those features into predefined categories. This process enables CNNs to effectively handle and classify complex visual data.  
+
+Pre-training a model in the context of neural networks involves training a model on a large dataset before fine-tuning it on a specific task, with the end result known as transfer learning. Pre-training is a powerful technique, especially in scenarios where data are scarce or where training a model from scratch would be impractical due to resource constraints. In this project, we used the ResNet50 CNN, trained to classifiy 14 million images in the ImageNet dataset into 1,000 different categories, as our pre-trained model. We applied this model, by itself, and in combination with our own CNN model, to the chest images for classification. 
+
+Because we were working with four distinct image lables classes (adenocarcinoma, large cell carcinoma, squamous cell carcinoma, and healthy cells), we chose the sparse categorical crossentropy loss function. We anticipated lables as integers because we used the tf.keras.preprocessing.image_dataset_from_directory' function from TensorFlow’s Keras API to load image data from the train, test, and validate directories, which automatically labels images based on directory structure.
 We defined, compiled, and trained two CNN submodels - one custom and one pre-trained - individually before ensembling and chaining them. We looked for a noticeable improvement in accuracy between the ensembled model and/or the chained model, over each of the two submodels.  
   
  a) the pre-trained ResNet50-based model (first_model)   
@@ -14,23 +25,9 @@ We defined, compiled, and trained two CNN submodels - one custom and one pre-tra
  c) ensembling the output of model_one and model_two with ensemble_model  
  d) transfer learning: chaining first and second models, modified for compatabilty, into chained_model
 
-
-| Model          |   Train Loss |   Train Accuracy |   Validation Loss |   Validation Accuracy |   Test Loss |   Test Accuracy |  
-|:---------------|-------------:|-----------------:|------------------:|----------------------:|------------:|----------------:|  
-| first_model    |     0.437609 |         0.822186 |          1.02791  |              0.652778 |    1.17075  |        0.514286 |  
-| second_model   |     0.572898 |         0.743883 |          0.727373 |              0.763889 |    1.57829  |        0.469841 |  
-| ensemble_model |     1.38543  |         0.257749 |          1.44298  |              0.222222 |    1.38834  |        0.234921 |  
-| chained_model  |     0.538555 |         0.774878 |          0.95535  |              0.638889 |    0.956217 |        0.568254 |  
+We compared training loss, training accuracy, validation loss, validation accuracy, balance score, average accuracy score, and composite score in evaluating the four models. With decent learning on the training data, mild overfitting, and the best generalization of all four models, the chained_model demonstrated the best overall performance. It also achieved the highest composite score, indicating it was the most balanced and accurate of the models. Our recommendation is to use the chained_model as the preferred choice of models.
   
   
-| Model          |   Balance Score |   Average Accuracy |   Composite Score |  
-|:---------------|----------------:|-------------------:|------------------:|  
-| first_model    |        0.6921   |           0.663083 |          0.677591 |  
-| second_model   |        0.705952 |           0.659204 |          0.682578 |  
-| ensemble_model |        0.964473 |           0.238297 |          0.601385 |  
-| chained_model  |        0.793376 |           0.660674 |          0.727025 |  
-
-
 Concepts discussed:  
 Convolutional Neural Networks  
 Pre-trained models  
@@ -299,12 +296,7 @@ c) estimating ensemble loss and ensemble accuracy by requesting ensemble_model.e
 | ensemble_model |        0.964473 |           0.238297 |          0.601385 |  
 | chained_model  |        0.793376 |           0.660674 |          0.727025 |  
   
-
-Best Model: The chained_model achieves the highest composite score, combining good accuracy and consistency.
-Most Consistent Model: The ensemble_model has the highest balance score but suffers from low accuracy, reducing its practical utility.
-General Performance: The first_model and second_model are very similar in terms of composite scores, with the second model having slightly better consistency.
-Recommendation: Use the chained_model as the primary choice due to its balance of accuracy and consistency.
-
+  
 ## Model Performance Summaries  
 
   first_model  
@@ -324,7 +316,7 @@ second_model
 ensemble_model  
   * Training performance: Very low accuracy and high loss indicated underfitting; the ensemble_model failed to capture meaningful patterns in the training data.  
   * Validation performance: Similarly low accuracy, coupled with high loss, indicated the ensemble did not improve performance over either of the submodels. 
-  * Testing performance: Again, accuracy and validation scores confirm the chosen ensemble strategy did not improve performance. Giving the two submodels equal weight when averaging their predictions was ineffective at predicting class assignments.
+  * Testing performance: Again, accuracy and validation scores confirm the chosen ensemble strategy did not improve performance. Giving the two submodels equal weight when averaging their predictions was ineffective at predicting class assignments. 
   * Demonstrated the highest balance score but suffered from the lowest accuracy, reducing its utility in practice.
   * Conclusion: Very low training, validation, and test accuracy scores - coupled with high training, validation, and testing losses, indicated ensemble_model struggled to fit and generalize across all datasets. ensemble_model demonstrated the poorest optimization and learning capability, despite the high balance score.  
  
@@ -335,16 +327,12 @@ chained_model
   * Acheived the highest composite score among the four models, demonstrating good accuracy and consistency.
   * Conclusion: chained_model achieved the best generalization, balancing, training, validation, and testing performance among all four models. 
 
-With decent learning on the training data, mild overfitting, and the best generalization of all four models, the chained_model demonstrated the best overall performance. It also achieved the highest composite score, indicating it was the most balanced and accurate of the models. 
+With decent learning on the training data, mild overfitting, and the best generalization of all four models, the chained_model demonstrated the best overall performance. It also achieved the highest composite score, indicating it was the most balanced and accurate of the models. Our recommendation is to use the chained_model as the preferred choice of models.
+  
 
+## Potential Next Steps  
 
-
-
-
-
-We noted some unexpected results when combining the two models. Neither the ensemble_model nor the chained_model outperformed the first_model (the ResNet50-based classifier). The accuracy results for the ensemble_model were especially low, when compared with the two submodels.
-
-It is unusual for an ensemble model that combines its submodels' output to have lower accuracy than its individual submodels. Such results can indicate that there's an issue with prediction averaging, if the models' outputs are raw logits or probabilities. Because the two classification models are generating averageable probabilities, however, averaging errors are not at play.
+The accuracy results for the ensemble_model were especially low. It is unusual for an ensemble model that combines its submodels' output to have lower accuracy than its individual submodels. Such results can indicate an issue with prediction averaging, if the models' outputs are raw logits or probabilities. Because the two classification models are generating averageable probabilities, however, averaging errors are not at play.
 
 Likewise, we can rule out the possibility that the model was trained using pseudo-lables rather than true labels, since we explicitly specified the relevant true lables as the validation_data. Pseudo-labeling would have occured if we trained the ensemble model on the submodel predictions as labels, instead of using the true labels.
 
@@ -352,9 +340,13 @@ Finally, a problem with the evaluation methodology doesn't explain the lower acc
 
 It could be that the two submodels are underperforming or have biases. If this is the case, averaging the two submodels' predictions would not necessarily improve performance. It's also possible that averaging the submodels' predictions is exacerbating weaknesses in the two models if the models are making similar errors. 
 
-Overfitting or underfitting could also be a factor. Averaging the predictions of models that overfit the training data could result in poor generalization to unseen data. Averaging predictions could also be problematic if the submodels are underfitting the training data because the averages could be failing to capture complex patterns. 
+Overfitting or underfitting could also be a factor. Averaging the predictions of models that overfit the training data could result in poor generalization to unseen data. Averaging predictions could also be problematic if the submodels are underfitting the training data, because the averages could be failing to capture complex patterns. 
+  
+It may be the case that simple averaging is not appropriate when ensembling first_model and second_model. Averaging predictions when one model submodel is significantly better than the other can dilute the effectiveness of the stronger model. Using weighted averaging instead of simple averaging might be called for in this case. A possible next step could be ensembling first_model and second_model with weighted averages.
 
-Alternatively, it might be the case that simple averaging is not appropriate when ensembling our two models. Averaging predictions when one model submodel is significantly better than the other can dilute the effectiveness of the stronger model. Using weighted averaging instead of simple averaging might be called for in this case, as first_model has significantly better accuracy scores than second_model. A possible next step could be ensembling first_model and second_model with weighted averages. 
+
+
+
 
 
 
@@ -379,23 +371,6 @@ The images to be classified were CT chest images from the dataset found at   htt
 | ensemble_model | 1.4364 | 0.2120 | 1.4026 | 0.277 |
 | chained_model | 0.8707 | 0.6215 | 0.9116 | 0.5833 |
 
-## Project Overview
-
-The data for this project was obtained at: https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images. Images reveal the presence of one of three chest carcinomas or the presence of healthy cells. The models' tasks are thus to classify each image as an one of the following four outcomes: adenocarcinoma, large cell carcinoma, squamous cell carcinoma, or healthy cells. All images were divided into training (613), testing (315), and validation (72) sets containing four types of images. 
-
-We trained a convolutional neural network (CNN) model from scratch to classify CT chest scan images as either cancerous or normal, and then investigated the added benefit of using a pre-trained CNN model on the same dataset by employing transfer learning and model ensembling.
-
-CNNs use convolutional and pooling layers to automatically and hierarchically learn features from images, followed by fully connected layers to classify those features into predefined categories. This process enables CNNs to effectively handle and classify complex visual data.  
-
-Pre-training a model in the context of neural networks involves training a model on a large dataset before fine-tuning it on a specific task, with the end result known as transfer learning. Pre-training is a powerful technique, especially in scenarios where data are scarce or where training a model from scratch would be impractical due to resource constraints. In this project, we used the ResNet50 CNN, trained to classifiy 14 million images in the ImageNet dataset into 1,000 different categories, as our pre-trained model. We applied this model, by itself, and in combination with our own CNN model, to the chest images for classification. 
-
-Because we were working with four distinct image lables classes (adenocarcinoma, large cell carcinoma, squamous cell carcinoma, and healthy cells), we chose the sparse categorical crossentropy loss function. We anticipated lables as integers because we used the tf.keras.preprocessing.image_dataset_from_directory' function from TensorFlow’s Keras API to load image data from the train, test, and validate directories, which automatically labels images based on directory structure.
 
 
 
-
-
-
-<img width="914" alt="Screenshot 00a" src="https://github.com/user-attachments/assets/1c553bd2-3721-4a88-a616-a1523fc68a76">
-<img width="915" alt="Screenshot 00b" src="https://github.com/user-attachments/assets/a056c7aa-509f-4825-8a81-d6ed52e130a4">
-## ensemble_model, combining the predictions of first_model and second-model
