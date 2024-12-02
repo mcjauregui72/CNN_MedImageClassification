@@ -239,7 +239,7 @@ The following metrics, when used together, provide a comprehensive evaluation of
   
 ### Model Accuracy  
   
-Model accuracy is calculated as the number of correctly classified predictions divided by the total number of predictions. It indicates how well the model performs overall, but it does not take into account any costs related to misclassifications or class imbalance. 
+Model accuracy is calculated as the number of correctly classified predictions divided by the total number of predictions. It indicates how well the model performs overall, but doesn't consider any costs related to misclassifications or class imbalance. 
  
 ### Model Loss  
   
