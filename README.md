@@ -26,7 +26,7 @@ Model Balance Score
 Model Average Accuracy Score  
 Model Composite Score  
   
-The data for this project was obtained here: https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images. The notebook for this project is Ensemble_Chain_ResNet_custom_manual_sparse.ipynb.
+The data for this project was obtained here: https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images. The notebook for this project is SubmodelsEnsembleChain.ipynb.
 
 ## Project Overview
 
