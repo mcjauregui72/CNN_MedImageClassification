@@ -20,42 +20,35 @@ Convolutional Neural Networks
 Pre-trained models  
 Model Ensembling  
 Transfer Learning/Model Chaining  
-Model Loss
-Model Accuracy
-Model Balance Score
-Model Average Accuracy Score
-Model Composite Score
+Model Loss  
+Model Accuracy  
+Model Balance Score  
+Model Average Accuracy Score  
+Model Composite Score  
   
 The data for this project was obtained here: https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images. The notebook for this project is Ensemble_Chain_ResNet_custom_manual_sparse.ipynb.
 
 ## Project Overview
 
-The data for this project was obtained at https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images. Data consisted of CT scan images revealing the presence of one of three chest carcinomas or the presence of healthy cells. We tasked four models with classifying each image as an one of the following four outcomes: adenocarcinoma, large cell carcinoma, squamous cell carcinoma, or healthy cells. All images were divided into training (613 images), testing (315 images), and validation (72 images) sets containing the four classes of images.
+Data consisted of CT scan images revealing the presence of one of three chest carcinomas or the presence of healthy cells. We tasked four models with classifying each image as an one of the following four outcomes: adenocarcinoma, large cell carcinoma, squamous cell carcinoma, or healthy cells. All images were divided into training (613 images), testing (315 images), and validation (72 images) sets containing the four classes of images.
 
-We trained two convolutional neural network (CNN) models to classify CT chest scan images as either normal or showing one of three forms of cancer. We investigated the benefit of using a pre-trained CNN model on the same dataset by employing transfer learning and model ensembling.
+We trained two convolutional neural network (CNN) models to classify CT chest scan images, a pre-trained ResNet50-based model and a custom CNN. We next investigated the benefit of using the pre-trained model in conjunction with the custom CNN by employing model ensembling and transfer learning (chaining). 
 
 CNNs use convolutional and pooling layers to automatically and hierarchically learn features from images, followed by fully connected layers to classify those features into predefined categories. This process enables CNNs to effectively handle and classify complex visual data.  
 
-Pre-training a model in the context of neural networks involves training a model on a large dataset before fine-tuning it on a specific task, with the end result known as transfer learning. Pre-training is a powerful technique, especially in scenarios where data are scarce or where training a model from scratch would be impractical due to resource constraints. In this project, we used the ResNet50 CNN, trained to classifiy 14 million images in the ImageNet dataset into 1,000 different categories, as our pre-trained model. We applied this model, by itself, and in combination with our own CNN model, to the chest images for classification. 
+In this project, we used the ResNet50 CNN, trained to classifiy 14 million images in the ImageNet dataset into 1,000 different categories, as the base of our pre-trained model. This entailed modifying the ResNet50 to mke it compatible for both ensembling and chaining with the custom CNN. 
 
 Because we were working with four distinct image lables classes (adenocarcinoma, large cell carcinoma, squamous cell carcinoma, and healthy cells), we chose the sparse categorical crossentropy loss function. We anticipated lables as integers because we used the tf.keras.preprocessing.image_dataset_from_directory' function from TensorFlow’s Keras API to load image data from the train, test, and validate directories, which automatically labels images based on directory structure.
-We defined, compiled, and trained two CNN submodels - one custom and one pre-trained - individually before ensembling and chaining them. We looked for a noticeable improvement in accuracy between the ensembled model and/or the chained model, over each of the two submodels.  
-  
-
-
-
-  
-  
-
-  
+We defined, compiled, and trained the individual CNN submodels (pre-trained and custom) on the image data before ensembling and chaining the submodels. We looked for a noticeable improvement in accuracy between the ensembled model and/or the chained model, over each of the two submodels.  
     
+   
 ## Convolutional Neural Networks  
   
 CNNs use convolutional and pooling layers to automatically and hierarchically learn features from images, and use fully connected layers to classify those features into predefined categories. This process enables CNNs to effectively handle and classify complex visual data.  
     
-We built our custom CNN (model_two) and our ResNet50-based pre-trained model with the following components:  
+We built the ResNet50-based pre-trained model (first_model) and the custom CNN (second_model) with the following components:  
   
-1. Input Layer: Our input images are represented as matrices of pixel values.   
+1. Input Layer: Where our input images are represented as matrices of pixel values.   
 
 2. Convolutional Layers: These layers applied convolutional filters (or kernels) to the inputs. Each filter scanned the images and performed a convolution operation involving element-wise multiplication and results summing. These layers extracted features like edges, textures, and patterns from each image and produced a feature map highlighting the presence of specific features in different parts of the image. 
   
@@ -72,18 +65,18 @@ We built our custom CNN (model_two) and our ResNet50-based pre-trained model wit
  
 ## Pre-trained Models
 
-Pre-training a neural network involves training a model on a large, broad, general-purpose dataset before fine-tuning it on a specific task (a new set of specific, likely previously unseen data). The ResNet50 model is a well-known model that was trained on the ImageNet database, a collection of millions of images classified across thousands of categories.   
+Pre-training a neural network involves training a model on a large, broad, general-purpose dataset before fine-tuning it on a specific task (a new set of specific, likely previously unseen data). The ResNet50 model is a well-known model that was trained on the ImageNet database, a collection of millions of images classified across 1,000 categories.   
 
-During pre-training, the model learns to identify and extract general features from the input data, such as images' edges, textures, and shapes. These features become broadly useful across new tasks and data domains, even if the new data was never part of the training data.
+During pre-training, the ResNet50 model learned to identify and extract general features from the input data, such as images' edges, textures, and shapes. These features become broadly useful across new tasks and data domains, even if the new data was never part of the training data.
 
-The benefits of pre-training include improved performance, better generalization, and reduced training time. Pre-training allows the model to leverage knowledge learned from a large and diverse dataset. This accumulated knowledge can lead to better performance on the new task, especially when the new dataset is small or lacks diversity. Training a model from scratch can be computationally expensive and time-consuming. Pre-training on a large dataset and then fine-tuning it can significantly reduce the time required to achieve good performance.
+The benefits of pre-training include improved performance, better generalization, and reduced training time. Pre-training allows a model to leverage knowledge learned from a large and diverse dataset. This accumulated knowledge can lead to better performance on the new task, especially when the new dataset is small or lacks diversity. Training a model from scratch can be computationally expensive and time-consuming. Pre-training on a large dataset and then fine-tuning it can significantly reduce the time required to achieve good performance.
 
 Pre-trained models often generalize better to new tasks because they start with a solid understanding of basic features and patterns, which can help improve accuracy on the new task. Pre-training can be a powerful technique, especially when data are scarce or where training a model from scratch would be impractical given resource constraints.  
 
   
 ## Submodel Compatibility Considerations
   
-To ensure our custom CNN and the pre-trained CNN would be compatible with each other for direct ensembling and transfer learning puposes, we took the following precautions and made adaptations to the original ResNet50 model. Note we refer to our ResNet50-based model as first_model.   
+To make our pre-trained, ResNet50-based CNN (first_model) and our custom CNN (second_model) compatible with each other for direct ensembling and transfer learning puposes, we took the following precautions and made adaptations to the original ResNet50 model.  
   
 1. Used the tf.keras.preprocessing.image_dataset_from_directory method to generate our training_set, testing_set, and validation_set.  
    * This method automatically labeled all images based on their subdirectory names. 
@@ -91,20 +84,20 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
     
 2. Specified image_size as (224, 224) for first_model because ResNet50-based models expect images of that size. For purposes of consistency, we set the image_size to (224, 224) for second_model as well.  
      
-3. Specified channels, img_shape, and class_count in first_model to be identical to those in second_model
+3. Specified channels, img_shape, and class_count in first_model to be identical to those in second_model.
    
-4. Defined the same data augmentation layers in both submodels and applied data augmentation to the input tensor
+4. Defined the same data augmentation layers in both submodels and applied data augmentation to both models' input tensors.
   
 5. Defined the same rescaling layers in both submodels, and specified the input tensor as the scaled inputs
    
-6. Applied data augmentation and rescaling in both submodels, early in the model pipeline
+6. Applied data augmentation and rescaling in both submodels, early in the model pipeline.
     * When ensembling two models, it is appropriate to apply data augmentation and rescaling in both submodels.
     * In particular, data augmentation should come before rescaling, right after defining the model's input layer.
     * Data augmentation techniques (e.g., RandomRotation, RandomZoom, RandomFlip) are designed to work on raw pixel values in the 0-255 range.
     * If rescaling is done first, pixel values are converted to 0-1, which could interfere with how certain augmentations are applied.
     * Because the ResNet50-based base_model component of our first_model expected inputs' pixel values to be normalized to a range between 0 and 1, we rescaled the augmented input data before passing it to the ResNet50 layers. 
   
-7. Specified include_top = False to effectively removed ResNet50's top layer so we could replace it with one suited for our own task.  Because the original ResNet50 model was pretrained to classify over a million ImageNet images into 1,000 classes, it outputs feature maps when its top layer is removed. 
+7. Specified include_top = False to effectively removed ResNet50's top layer so we could replace it with one suited for our own task. Because the original ResNet50 model was pretrained to classify over a million ImageNet images into 1,000 classes, it outputs feature maps when its top layer is removed. 
 
 8. Added a pooling='max' layer to the ResNet50-based model to control the shape of the output tensor and ensure compatibility with the subsequent layers that needed to be added.  
    * The ResNet50 model outputs a 4D tensor after its convolutional layers when include_top=False and no pooling is applied. This tensor could not be fed directly into fully connected Dense layers, which require a 2D input.  
@@ -117,26 +110,26 @@ To ensure our custom CNN and the pre-trained CNN would be compatible with each o
    * Layer freezing effectively turned ResNet50 into a feature extractor.  
     
 10. Built both submodels with the Functional API because it supports more flexibility than the Sequential API. In particular, the Functional API
-    * Affords more flexibility when combining pre-trained models with custom layers or sharing layers between models 
-    * Allows for explicit definition of the flow of data, enabl fine control over how layers connect and interact  
-    * Supports freezing layers and chaining models  
-    * Handles the complexities involved in ensembling models  
+    * Affords more flexibility when combining pre-trained models with custom layers or sharing layers between models. 
+    * Allows for explicit definition of the flow of data, enabl fine control over how layers connect and interact.  
+    * Supports freezing layers and chaining models.  
+    * Handles the complexities involved in ensembling models.  
      
 11. Added custom layers on top of the ResNet50-based base to allow the final model to complete our four-class classification task and to be ensembled and chained with the other submodel.
     * Both the BatchNormalization and Dropout layers helped improve generalization on unseen data.  
-    * The Dense(256, activation='relu') layer learned more complex patterns from the high-level features provided by ResNet50
-    * These more complex patterns became relevant to our classification task
-    * The relu activation function supported the custom layers to model more intricate relationships between features
-    * Dropout(0.25) was intended to prevent overfitting by forcing the model to learn more robust features and preventing it from becoming too reliant on specific neurons 
+    * The Dense(256, activation='relu') layer learned more complex patterns from the high-level features provided by ResNet50.  
+    * These more complex patterns became relevant to our classification task.  
+    * The relu activation function supported the custom layers to model more intricate relationships between features.  
+    * Dropout(0.25) was intended to prevent overfitting by forcing the model to learn more robust features and preventing it from becoming too reliant on specific neurons.   
   
-12. Defined identical output layers in each submodel:
-    * Dense(class_count, activation = 'softmax') to output a probability distribution across the classes (given by class_count).
-    * Each value in the probability distribution corresponded to the predicted probability that the input image belonged to a given class
+12. Defined identical output layers in each submodel:  
+    * Dense(class_count, activation = 'softmax') to output a probability distribution across the classes (given by class_count).  
+    * Each value in the probability distribution corresponded to the predicted probability that the input image belonged to a given class.  
     * We chose the Softmax activation because it can return a probability distribution over three or more classes
     
 14. Compiled both submodels with optimizer='adam', loss='sparse_categorical_crossentropy', and metrics=['accuracy']. We chose the 'sparse_categorical_crossentropy' function because our dataset includes integer labels and it works for most multi-classification tasks.  
 
-15. Trained both submodels with identical EarlyStopping and ModelCheckpoint callbacks. 
+15. Trained both submodels with identical EarlyStopping and ModelCheckpoint callbacks.  
   
   
 ## Model Ensembling  
@@ -190,7 +183,7 @@ The considerations we had to take into account when chaining model_one and model
 1. Saving and renaming fist_model and second_model as mod_first_model and mod_second_model, because we'd need to make modifications to the original code.
  
 2. Removing the final, dense layer from mod_first_model because we didn't want it to generate a vector representing class probabilities. We wanted to use mod_first_model only as a feature extractor, allowing mod_second_model to generate the class probabilities.  
-    * We defined a new output layer to serve as feature extraction, mod_first_model_output = x  
+    * We defined a new output layer to serve as feature extraction, mod_first_model_output = x.  
     * Thus, the final output of mod_first_model became the result of the Dropout layer, the layer immediately preceding the final output layer.  
       
 3. Because data augmentation and rescaling is necessary only in the first of two chained submodels, we removed augmentation and rescaling layers from mod_second_model.  
@@ -198,100 +191,99 @@ The considerations we had to take into account when chaining model_one and model
 4. Removing the dropout, convolutional, and pooling layers present in second_model from mod_second_model because such layers are already present in the ResNet50 base of mod_first_model. Not removing these custom layers risked: 
       
    * Over-Parameterization, which could have resulted in a model with too many parameters. Over-Parameterized models  
-      * Have an increased risk of overfitting, especially on small datasets
-      * May require more computational resources
-      * Can make training unstable  
+      * Have an increased risk of overfitting, especially on small datasets.  
+      * May require more computational resources.  
+      * Can make training unstable.    
   
-   * Redundant Feature Extraction, which could have caused computational inefficiency and
-possible degradation of learned features, as custom layers "over-process" the features  
+   * Redundant Feature Extraction, which could have caused computational inefficiency and possible degradation of learned features, as custom layers "over-process" the features.    
   
-   * Loss of Transfer Learning Benefits, if custom layers on top of ResNet50 had disrupted the transfer learning process  
-      * If the transfer learning process is disrupted, training essentially begins again from scrath and the benefit of pretrained weights is lost  
-      * Custom layers may not complement the ResNet50-extracted features, reducing model effectiveness  
-      * Too many layers could undermine the pre-trained model's ability to generalize  
+   * Loss of Transfer Learning Benefits, if custom layers on top of ResNet50 had disrupted the transfer learning process.  
+      * If the transfer learning process is disrupted, training essentially begins again from scrath and the benefit of pretrained weights is lost.  
+      * Custom layers may not complement the ResNet50-extracted features, reducing model effectiveness.    
+      * Too many layers could undermine the pre-trained model's ability to generalize.    
 
-   * Training Instability, which can occur when excessive layers make the model architecture deeper and more complex than necessary  
+   * Training Instability, which can occur when excessive layers make the model architecture deeper and more complex than necessary.  
   
-   * Increased Risk of Overfitting, resulting in the model memorizing the training data instead of learning generalizable patterns  
+   * Increased Risk of Overfitting, resulting in the model memorizing the training data instead of learning generalizable patterns.    
   
 5. Removing second_model's Flatten layer from mod_second_model, as it was no longer necessary.   
   
 6. Defining one Dense and one Dropout layer before defining an output layer capable of producing a four-class classification.  
     
-7. We defined but didn't compile and train mod_first_model and mod_second_model, because we would train them as one chained model, chained_model.
+7. We defined but didn't compile and train mod_first_model and mod_second_model, because we would train them as one chained model, chained_model.  
 
-8. Chaining mod_first_model and mod_second_model by:
+8. Chaining mod_first_model and mod_second_model by:  
    
    * Defining variable 'mod_first_model_output' to hold the feature vector output from 'mod_first_model'; mod_first_model_output = mod_first_model.output  
-   * Passing feature vector mod_first_model_output into mod_second_model, which would take the feature vector and process it further through its own layers
+   * Passing feature vector mod_first_model_output into mod_second_model, which would take the feature vector and process it further through its own layers  
    * Defining variable 'mod_second_model_output' to hold mod_second_model's output (classification probabilities) by setting mod_second_model_output = mod_second_model(mod_first_model_output)     
-   * Defining a new Keras model called chained_model that chains together mod_first_model and mod_second_model into one model by
-       * Setting chained_model = Model(inputs=mod_first_model.input, outputs=mod_second_model_output)
-       * Where inputs=mod_first_model.input specifies that the input to chained_model is the same as the input to mod_first_model, and
-       * Where outputs=mod_second_model_output specifies that chained_model's output is taken from mod_second_model_output,
-       * Which was the output of mod_second_model after the feature vector was passed from mod_first_model
-
-9. Defining mod_first_model_output as mod_first_model_model.output, effectively making mod_first_model's layers the first 'link' in the chain.
+   * Defining a new Keras model called chained_model that chains together mod_first_model and mod_second_model into one model by  
+       * Setting chained_model = Model(inputs=mod_first_model.input, outputs=mod_second_model_output)  
+       * Where inputs=mod_first_model.input specifies that the input to chained_model is the same as the input to mod_first_model, and  
+       * Where outputs=mod_second_model_output specifies that chained_model's output is taken from mod_second_model_output,  
+       * Which was the output of mod_second_model after the feature vector was passed from mod_first_model.  
+  
+9. Defining mod_first_model_output as mod_first_model_model.output, effectively making mod_first_model's layers the first 'link' in the chain.  
    
-10. Definining mod_second_model_output as mod_second_model(mod_first_model_output), to pass the first 'link's' output to the second 'link' in the chain, mod_second_model.
+10. Definining mod_second_model_output as mod_second_model(mod_first_model_output), to pass the first 'link's' output to the second 'link' in the chain, mod_second_model.  
    
-11. Defining the output of the second link in the chain as mod_second_model_output, allowing us to define the composite model, chained_model, as Model(inputs=mod_resnet_model.input, outputs=mod_custom_cnn_output).
+11. Defining the output of the second link in the chain as mod_second_model_output, allowing us to define the composite model, chained_model, as Model(inputs=mod_resnet_model.input, outputs=mod_custom_cnn_output).  
     
-12. Specifying optimizer = Adam(), defining a filepath to save chained_model's best model, and defining equivalent EarlyStopping and ModelCheckpoint callbacks as used previously.
+12. Specifying optimizer = Adam(), defining a filepath to save chained_model's best model, and defining equivalent EarlyStopping and ModelCheckpoint callbacks as used previously.  
     
 13. Training chained_model on the dataset training_set and setting validation_set as the validation_data.   
-
-
-## Terms Describing Model Performance  
-
-The following metrics, when used together, provide a comprehensive evaluation of a model’s performance. That is, they communicate how accurate, consistent, and well-suited for generalization any given model is for a task.
   
-### Model Accuracy
-
+  
+## Terms Describing Model Performance  
+  
+The following metrics, when used together, provide a comprehensive evaluation of a model’s performance. That is, they communicate how accurate, consistent, and well-suited for generalization any given model is for a task.  
+  
+### Model Accuracy  
+  
 Model accuracy is calculated as the number of correctly classified predictions divided by the total number of predictions. It indicates how well the model performs overall, but it does not take into account any costs related to misclassifications or class imbalance. 
  
-### Model Loss
-
+### Model Loss  
+  
 Model loss is a numerical value that represents the difference between predicted values and actual values. It can be calculated in various ways, using such loss functions desgined for classfication tasks as categorical_crossentropy or sparse_categorical_crossentropy. Loss plays an important role in a model's straining process, adjusting weights and minimizing errors. 
   
-### Model Balance
+### Model Balance  
   
 A model's Balance Score is calculated as 1 - Max Gap, where Max Gap is the largest absolute value difference between a model's training, validation, and testing accuracies: max_gap = max(abs(training accuracy - validation accuracy), abs(validation accuracy - testing accuracy), abs(training accuracy - testing accuracy)).   
-The Balance Score measures consistency in a model's accuracy across training, validation, and testing. The more balanced the model, the more consistenlty it performs across datasets. Balanced models are more likely to perform well on new, unseen data than unbalanced models, making them more useful.
+The Balance Score measures consistency in a model's accuracy across training, validation, and testing. The more balanced the model, the more consistenlty it performs across datasets. Balanced models are more likely to perform well on new, unseen data than unbalanced models, making them more useful.  
   
-When balance is good, the model's performance metrics (accuracy, loss) across training, validation, and testing datasets are both:
-   a. Similar, exhibiting small gaps between datasets, indicating reasonable generalization, and
-   b. Consistent, with validation and testing results not significantly better nor worse than training results
+When balance is good, the model's performance metrics (accuracy, loss) across training, validation, and testing datasets are both:  
+   a. Similar, exhibiting small gaps between datasets, indicating reasonable generalization, and  
+   b. Consistent, with validation and testing results not significantly better nor worse than training results.  
   
 When balance is poor, the model overfits to the training data and performs significantly worse on unseen data. The Balance Score is intended to keep the model from overfitting (memorizing training data but failing on unseen data) and underfitting (failing to learn meaningful patters from the data). Poorly balanced models are not robust, but very senstive to variations in data. With strong balance, a model produces consistent and reliable results across datasets, making it effective and reliable.  
   
-### Model Average Accuracy
+### Model Average Accuracy  
   
 A model's Average Acuracy Score is the mean of the model's training accuracy, validation accuray, and testing accuray values. The Average Accuracy Score indicates how well a model is performing across all three datasets, providing a measure of absolute performance. 
     
-### Model Composite Score
+### Model Composite Score  
   
-A model's Composite Score is a weighted combination of its Balance and Average Accuracy Scores: Composite Score = w1 × Balance Score + w2 × Average Accuracy, where w1 and w2 are weights assigend to the component scores, respectively. Because it measures consistency and absolute accuracy, its regarded as an indication of a model's overall performance. Composite Score is a single metric that considers both the importance of model stability (balance) and the importance of overall performance (accuracy). 
+A model's Composite Score is a weighted combination of its Balance and Average Accuracy Scores: Composite Score = w1 × Balance Score + w2 × Average Accuracy, where w1 and w2 are weights assigend to the component scores, respectively. Because it measures consistency and absolute accuracy, its regarded as an indication of a model's overall performance. Composite Score is a single metric that considers both the importance of model stability (balance) and the importance of overall performance (accuracy).   
   
   
-## Evaluating all four models
+## Evaluating All Four Models  
   
-When it came to evaluating all four models, first_model and second_model (the submodels) needed to be evaluated on the unseen testing_set dataset to get unbiased performance metrics. With first_model, second_model, and chained_model already trained on the training_set and validated on the validation_set, we evaluated these three models on the testing_data.
-
-With the ensemble_model, evaluation was a matter of 
+When it came to evaluating all four models, first_model and second_model (the submodels) needed to be evaluated on the unseen testing_set dataset to get unbiased performance metrics. With first_model, second_model, and chained_model already trained on the training_set and validated on the validation_set, we evaluated these three models on the testing_data.  
+  
+With the ensemble_model, evaluation was a matter of   
 a) averaging the predictions from the two submodels on the unseen testing_set,  
 b) extracting the labels from the testing_set, and   
-c) estimating ensemble loss and ensemble accuracy by requesting ensemble_model.evaluate(ensemble_predictions, y_test)
+c) estimating ensemble loss and ensemble accuracy by requesting ensemble_model.evaluate(ensemble_predictions, y_test).  
   
   
-## Tables of results
-
-| Model          |   Train Loss |   Train Accuracy |   Validation Loss |   Validation Accuracy |   Test Loss |   Test Accuracy |
-|:---------------|-------------:|-----------------:|------------------:|----------------------:|------------:|----------------:|
-| first_model    |     0.437609 |         0.822186 |          1.02791  |              0.652778 |    1.17075  |        0.514286 |
-| second_model   |     0.572898 |         0.743883 |          0.727373 |              0.763889 |    1.57829  |        0.469841 |
-| ensemble_model |     1.38543  |         0.257749 |          1.44298  |              0.222222 |    1.38834  |        0.234921 |
-| chained_model  |     0.538555 |         0.774878 |          0.95535  |              0.638889 |    0.956217 |        0.568254 |
+## Tables Of Results  
+  
+| Model          |   Train Loss |   Train Accuracy |   Validation Loss |   Validation Accuracy |   Test Loss |   Test Accuracy |    
+|:---------------|-------------:|-----------------:|------------------:|----------------------:|------------:|----------------:|  
+| first_model    |     0.437609 |         0.822186 |          1.02791  |              0.652778 |    1.17075  |        0.514286 |  
+| second_model   |     0.572898 |         0.743883 |          0.727373 |              0.763889 |    1.57829  |        0.469841 |  
+| ensemble_model |     1.38543  |         0.257749 |          1.44298  |              0.222222 |    1.38834  |        0.234921 |  
+| chained_model  |     0.538555 |         0.774878 |          0.95535  |              0.638889 |    0.956217 |        0.568254 |  
   
     
 | Model          |   Balance Score |   Average Accuracy |   Composite Score |  
@@ -304,78 +296,48 @@ c) estimating ensemble loss and ensemble accuracy by requesting ensemble_model.e
   
 ## Model Performance Summaries  
 
-  first_model  
+first_model  
   * Training performance: With high training accuracy and relatively low training loss, first_model learned well on the training dataset. 
-  * Validation performance: Moderate accuracy but higher loss suggested overfitting. The first_model performed better on the training data than on the unseen data.
-  * Testing performance: A further drop in accuracy and increase in loss with the testing data confirmed that first_model generalized poorly to new data.
-  * Demonstrated moderate balance and consistency, but not the highest composite score of all four models.
-  * Conclusion: first_model is strong on training data but overfits, resulting in poor generalization.
-
+  * Validation performance: Moderate accuracy but higher loss suggested overfitting. The first_model performed better on the training data than on the unseen data.  
+  * Testing performance: A further drop in accuracy and increase in loss with the testing data confirmed that first_model generalized poorly to new data.  
+  * Demonstrated moderate balance and consistency, but not the highest composite score of all four models.  
+  * Conclusion: first_model is strong on training data but overfits, resulting in poor generalization.  
+  
 second_model  
   * Training performance: second_model demonstrated moderate training accuracy and loss, suggested reasonable learning ability on seen data.   
   * Validation Performance: that accuracy and loss improved on the validation data indicated less overfitting and better generalization than with first_model.    
-  * Testing Performance: significant drop in accuracy and increase in loss signaled overfitting and poor generalization on fully unseen data.
+  * Testing Performance: significant drop in accuracy and increase in loss signaled overfitting and poor generalization on fully unseen data.  
   * Demonstrated moderate balance and average accuracy, which appear to be masking the poor testing performance. 
   * Conclusion: second_model generalized well to the validation data but could not maintain similar performance on the test data.  
-
+  
 ensemble_model  
-  * Training performance: Very low accuracy and high loss indicated underfitting; the ensemble_model failed to capture meaningful patterns in the training data.  
+  * Training performance: Very low accuracy and high loss indicated underfitting; the ensemble_model failed to capture meaningful patterns in the training data.    
   * Validation performance: Similarly low accuracy, coupled with high loss, indicated the ensemble did not improve performance over either of the submodels. 
   * Testing performance: Again, accuracy and validation scores confirm the chosen ensemble strategy did not improve performance. Giving the two submodels equal weight when averaging their predictions was ineffective at predicting class assignments. 
-  * Demonstrated the highest balance score but suffered from the lowest accuracy, reducing its utility in practice.
+  * Demonstrated the highest balance score but suffered from the lowest accuracy, reducing its utility in practice.  
   * Conclusion: Very low training, validation, and test accuracy scores - coupled with high training, validation, and testing losses, indicated ensemble_model struggled to fit and generalize across all datasets. ensemble_model demonstrated the poorest optimization and learning capability, despite the high balance score.  
- 
-chained_model  
+   
+chained_model   
   * Training performance: Moderate accuracy and loss scores indicated a well-trained model with a good learning process and limited overfitting.  
   * Validation performance: lower accuracy than training accuracy, with more loss than training loss, suggested some overfitting.  
-  * Testing performance: Because accuracy was higher, and loss lower, than with first_model and second_model, chained_model exhibited better generalization to unseen data than the submodels.
-  * Acheived the highest composite score among the four models, demonstrating good accuracy and consistency.
-  * Conclusion: chained_model achieved the best generalization, balancing, training, validation, and testing performance among all four models. 
+  * Testing performance: Because accuracy was higher, and loss lower, than with first_model and second_model, chained_model exhibited better generalization to unseen data than the submodels.  
+  * Acheived the highest composite score among the four models, demonstrating good accuracy and consistency.  
+  * Conclusion: chained_model achieved the best generalization, balancing, training, validation, and testing performance among all four models.   
 
-With decent learning on the training data, mild overfitting, and the best generalization of all four models, the chained_model demonstrated the best overall performance. It also achieved the highest composite score, indicating it was the most balanced and accurate of the models. Our recommendation is to use the chained_model as the preferred choice of models.
+With decent learning on the training data, mild overfitting, and the best generalization of all four models, the chained_model demonstrated the best overall performance. It also achieved the highest composite score, indicating it was the most balanced and accurate of the models. Our recommendation is to use the chained_model as the preferred choice of models.  
   
-
+  
 ## Potential Next Steps  
-
-The accuracy results for the ensemble_model were especially low. It is unusual for an ensemble model that combines its submodels' output to have lower accuracy than its individual submodels. Such results can indicate an issue with prediction averaging, if the models' outputs are raw logits or probabilities. Because the two classification models are generating averageable probabilities, however, averaging errors are not at play.
-
-Likewise, we can rule out the possibility that the model was trained using pseudo-lables rather than true labels, since we explicitly specified the relevant true lables as the validation_data. Pseudo-labeling would have occured if we trained the ensemble model on the submodel predictions as labels, instead of using the true labels.
-
-Finally, a problem with the evaluation methodology doesn't explain the lower accuracy scores for the ensemble_model. The evaluation of the ensemble model wass consistent with how the model was trained (e.g., on averaged predictions). 
-
-It could be that the two submodels are underperforming or have biases. If this is the case, averaging the two submodels' predictions would not necessarily improve performance. It's also possible that averaging the submodels' predictions is exacerbating weaknesses in the two models if the models are making similar errors. 
-
-Overfitting or underfitting could also be a factor. Averaging the predictions of models that overfit the training data could result in poor generalization to unseen data. Averaging predictions could also be problematic if the submodels are underfitting the training data, because the averages could be failing to capture complex patterns. 
   
-It may be the case that simple averaging is not appropriate when ensembling first_model and second_model. Averaging predictions when one model submodel is significantly better than the other can dilute the effectiveness of the stronger model. Using weighted averaging instead of simple averaging might be called for in this case. A possible next step could be ensembling first_model and second_model with weighted averages.
+The accuracy results for the ensemble_model were especially low. It is unusual for an ensemble model that combines its submodels' output to have lower accuracy than its individual submodels. Such results can indicate an issue with prediction averaging, if the models' outputs are raw logits or probabilities. Because the two classification models are generating averageable probabilities, however, averaging errors are not at play.  
 
+Likewise, we can rule out the possibility that the model was trained using pseudo-lables rather than true labels, since we explicitly specified the relevant true lables as the validation_data. Pseudo-labeling would have occured if we trained the ensemble model on the submodel predictions as labels, instead of using the true labels.  
 
+Finally, a problem with the evaluation methodology doesn't explain the lower accuracy scores for the ensemble_model. The evaluation of the ensemble model wass consistent with how the model was trained (e.g., on averaged predictions).   
 
+It could be that the two submodels are underperforming or have biases. If this is the case, averaging the two submodels' predictions would not necessarily improve performance. It's also possible that averaging the submodels' predictions is exacerbating weaknesses in the two models if the models are making similar errors.   
 
-
-
-
-
-
-
-
-
-
-
-
-## Executive Summary   
+Overfitting or underfitting could also be a factor. Averaging the predictions of models that overfit the training data could result in poor generalization to unseen data. Averaging predictions could also be problematic if the submodels are underfitting the training data, because the averages could be failing to capture complex patterns.   
   
-In this document, we trained a convolutional neural network (CNN) model from scratch to classify CT chest scan images as either cancerous or normal, and then investigated the added benefit of using a pre-trained CNN model on the same dataset by employing transfer learning and model ensembling.
-
-The images to be classified were CT chest images from the dataset found at   https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images. Each image revealed one of the following four outcomes: adenocarcinoma, large cell carcinoma, squamous cell carcinoma, or healthy cells.
-
-| model | training loss | training accuracy | validation loss | validation accuracy |
-|-------|------|----------|----------|--------------|
-| first_model  | 0.6271  | 0.7406  | 1.009 | 0.6250 |
-| second_model  | 0.4488 | 0.8189 | 0.6815 | 0.8194 |
-| ensemble_model | 1.4364 | 0.2120 | 1.4026 | 0.277 |
-| chained_model | 0.8707 | 0.6215 | 0.9116 | 0.5833 |
-
-
-
+It may be the case that simple averaging is not appropriate when ensembling first_model and second_model. Averaging predictions when one model submodel is significantly better than the other can dilute the effectiveness of the stronger model. Using weighted averaging instead of simple averaging might be called for in this case. A possible next step could be ensembling first_model and second_model with weighted averages.  
 
