@@ -226,7 +226,7 @@ We took the following into account when chaining model_one and model_two:
 9. Defined mod_first_model_output as mod_first_model_model.output, making mod_first_model's layers the first 'link' in the chain.  
    
 10. Defined mod_second_model_output as mod_second_model(mod_first_model_output), to pass the first 'link's' output to the second 'link' in the chain, mod_second_model.      
-11. Defined the output of the second link in the chain as mod_second_model_output, allowing us to define the composite model, chained_model, as Model(inputs=mod_resnet_model.input, outputs=mod_custom_cnn_output).  
+11. Defined the output of the second link in the chain as mod_second_model_output. This allowed us to define the composite model, chained_model, as Model(inputs=mod_resnet_model.input, outputs=mod_custom_cnn_output).  
     
 12. Specified optimizer = Adam(), defined a filepath to save chained_model's best model, and defined equivalent EarlyStopping and ModelCheckpoint callbacks as used previously.  
     
