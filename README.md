@@ -243,31 +243,31 @@ Model accuracy is calculated as the number of correctly classified predictions d
  
 ### Model Loss  
   
-Model loss is a numerical value that represents the difference between predicted values and actual values. It can be calculated in various ways, using such loss functions desgined for classfication tasks as categorical_crossentropy or sparse_categorical_crossentropy. Loss plays an important role in a model's straining process, adjusting weights and minimizing errors. 
+Model loss is a numerical value that represents the difference between predicted values and actual values. It can be calculated in various ways, using loss functions specific to classfication tasks (e.g., categorical_crossentropy, sparse_categorical_crossentropy). Loss plays an important role in a model's straining process, adjusting weights and minimizing errors. 
   
 ### Model Balance  
   
 A model's Balance Score is calculated as 1 - Max Gap, where Max Gap is the largest absolute value difference between a model's training, validation, and testing accuracies: max_gap = max(abs(training accuracy - validation accuracy), abs(validation accuracy - testing accuracy), abs(training accuracy - testing accuracy)).   
-The Balance Score measures consistency in a model's accuracy across training, validation, and testing. The more balanced the model, the more consistenlty it performs across datasets. Balanced models are more likely to perform well on new, unseen data than unbalanced models, making them more useful.  
+The Balance Score measures consistency in a model's accuracy across training, validation, and testing. The more balanced the model, the more consistently it performs across datasets. Balanced models are more likely to perform well on new, unseen data than unbalanced models, making them more useful.  
   
 When balance is good, the model's performance metrics (accuracy, loss) across training, validation, and testing datasets are both:  
    a. Similar, exhibiting small gaps between datasets, indicating reasonable generalization, and  
    b. Consistent, with validation and testing results not significantly better nor worse than training results.  
   
-When balance is poor, the model overfits to the training data and performs significantly worse on unseen data. The Balance Score is intended to keep the model from overfitting (memorizing training data but failing on unseen data) and underfitting (failing to learn meaningful patters from the data). Poorly balanced models are not robust, but very senstive to variations in data. With strong balance, a model produces consistent and reliable results across datasets, making it effective and reliable.  
+When balance is poor, the model overfits to the training data and performs significantly worse on unseen data. The Balance Score is intended to keep the model from overfitting (memorizing training data but failing on unseen data) and underfitting (failing to learn meaningful patterns from the data). Poorly balanced models are not robust, but very senstive to variations in data. A model with strong balance produces consistent and reliable results across datasets, making it effective and reliable.  
   
 ### Model Average Accuracy  
   
-A model's Average Acuracy Score is the mean of the model's training accuracy, validation accuray, and testing accuray values. The Average Accuracy Score indicates how well a model is performing across all three datasets, providing a measure of absolute performance. 
+A model's Average Accuracy Score is the mean of the model's training accuracy, validation accuracy, and testing accuracy values. The Average Accuracy Score indicates how well a model performed across all three datasets, a measure of absolute performance. 
     
 ### Model Composite Score  
   
-A model's Composite Score is a weighted combination of its Balance and Average Accuracy Scores: Composite Score = w1 × Balance Score + w2 × Average Accuracy, where w1 and w2 are weights assigend to the component scores, respectively. Because it measures consistency and absolute accuracy, its regarded as an indication of a model's overall performance. Composite Score is a single metric that considers both the importance of model stability (balance) and the importance of overall performance (accuracy).   
+A model's Composite Score is a weighted combination of its Balance and Average Accuracy Scores: Composite Score = w1 × Balance Score + w2 × Average Accuracy, where w1 and w2 are weights assigend to the component scores, respectively. Because it measures consistency and absolute accuracy, it is regarded as an indication of a model's overall performance. Composite Score is a single metric that considers both the importance of model stability (balance) and the importance of overall performance (accuracy).   
   
   
 ## Evaluating All Four Models  
   
-When it came to evaluating all four models, first_model and second_model (the submodels) needed to be evaluated on the unseen testing_set dataset to get unbiased performance metrics. With first_model, second_model, and chained_model already trained on the training_set and validated on the validation_set, we evaluated these three models on the testing_data.  
+first_model and second_model (the submodels) needed to be evaluated on the unseen testing_set dataset to get unbiased performance metrics. Becaus first_model, second_model, and chained_model were already trained on the training_set and validated on the validation_set, we evaluated these three models on the testing_data.  
   
 With the ensemble_model, evaluation was a matter of   
 a) averaging the predictions from the two submodels on the unseen testing_set,  
@@ -296,22 +296,22 @@ c) estimating ensemble loss and ensemble accuracy by requesting ensemble_model.e
 ## Model Performance Summaries  
   
 first_model  
-  * Training performance: With high training accuracy and relatively low training loss, first_model learned well on the training dataset. 
-  * Validation performance: Moderate accuracy but higher loss suggested overfitting. The first_model performed better on the training data than on the unseen data.  
+  * Training performance: With high accuracy and relatively low loss, first_model learned well on the training dataset. 
+  * Validation performance: Moderate accuracy but higher loss suggested overfitting. first_model performed better on the training data than on the unseen data.  
   * Testing performance: A further drop in accuracy and increase in loss with the testing data confirmed that first_model generalized poorly to new data.  
   * Demonstrated moderate balance and consistency, but not the highest composite score of all four models.  
   * Conclusion: first_model is strong on training data but overfits, resulting in poor generalization.  
   
 second_model  
-  * Training performance: second_model demonstrated moderate training accuracy and loss, suggested reasonable learning ability on seen data.   
-  * Validation Performance: that accuracy and loss improved on the validation data indicated less overfitting and better generalization than with first_model.    
-  * Testing Performance: significant drop in accuracy and increase in loss signaled overfitting and poor generalization on fully unseen data.  
+  * Training performance: second_model demonstrated moderate training accuracy and loss, suggesting reasonable learning ability on seen data.   
+  * Validation performance: accuracy and loss improved on the validation data, indicating less overfitting and better generalization than first_model.    
+  * Testing performance: a significant drop in accuracy and increase in loss signaled overfitting and poor generalization on fully unseen data.  
   * Demonstrated moderate balance and average accuracy, which appear to be masking the poor testing performance. 
   * Conclusion: second_model generalized well to the validation data but could not maintain similar performance on the test data.  
   
 ensemble_model  
-  * Training performance: Very low accuracy and high loss indicated underfitting; the ensemble_model failed to capture meaningful patterns in the training data.    
-  * Validation performance: Similarly low accuracy, coupled with high loss, indicated the ensemble did not improve performance over either of the submodels. 
+  * Training performance: Very low accuracy and high loss indicated underfitting; ensemble_model failed to capture meaningful patterns in the training data.    
+  * Validation performance: Similarly low accuracy, coupled with high loss, indicated ensemble_model did not improve performance over either of the submodels. 
   * Testing performance: Again, accuracy and validation scores confirm the chosen ensemble strategy did not improve performance. Giving the two submodels equal weight when averaging their predictions was ineffective at predicting class assignments. 
   * Demonstrated the highest balance score but suffered from the lowest accuracy, reducing its utility in practice.  
   * Conclusion: Very low training, validation, and test accuracy scores - coupled with high training, validation, and testing losses, indicated ensemble_model struggled to fit and generalize across all datasets. ensemble_model demonstrated the poorest optimization and learning capability, despite the high balance score.  
@@ -320,7 +320,7 @@ chained_model
   * Training performance: Moderate accuracy and loss scores indicated a well-trained model with a good learning process and limited overfitting.  
   * Validation performance: lower accuracy than training accuracy, with more loss than training loss, suggested some overfitting.  
   * Testing performance: Because accuracy was higher, and loss lower, than with first_model and second_model, chained_model exhibited better generalization to unseen data than the submodels.  
-  * Acheived the highest composite score among the four models, demonstrating good accuracy and consistency.  
+  * Achieved the highest composite score among the four models, demonstrating reasonable accuracy and consistency.  
   * Conclusion: chained_model achieved the best generalization, balancing, training, validation, and testing performance among all four models.   
   
 With decent learning on the training data, mild overfitting, and the best generalization of all four models, the chained_model demonstrated the best overall performance. It also achieved the highest composite score, indicating it was the most balanced and accurate of the models. Our recommendation is to use the chained_model as the preferred choice of models.  
@@ -328,15 +328,15 @@ With decent learning on the training data, mild overfitting, and the best genera
   
 ## Potential Next Steps  
   
-The accuracy results for the ensemble_model were especially low. It is unusual for an ensemble model that combines its submodels' output to have lower accuracy than its individual submodels. Such results can indicate an issue with prediction averaging, if the models' outputs are raw logits or probabilities. Because the two classification models are generating averageable probabilities, however, averaging errors are not at play.  
+The accuracy results for ensemble_model were noticeably low. It is unusual for an ensemble model that combines its submodels' output to have lower accuracy than its submodels. Such results can indicate an issue with how predictions were averaged, if the models' outputs are raw logits or probabilities. Because the two classification models are generating averageable probabilities, however, averaging errors are not at play.  
   
-Likewise, we can rule out the possibility that the model was trained using pseudo-lables rather than true labels, since we explicitly specified the relevant true lables as the validation_data. Pseudo-labeling would have occured if we trained the ensemble model on the submodel predictions as labels, instead of using the true labels.  
+Likewise, we can rule out the possibility that the model was trained using pseudo-lables rather than true labels, since we explicitly specified the relevant true labels as the validation_data. Pseudo-labeling would have occured if we trained the ensemble model on the submodel predictions as labels, instead of using the true labels.  
   
-Finally, a problem with the evaluation methodology doesn't explain the lower accuracy scores for the ensemble_model. The evaluation of the ensemble model wass consistent with how the model was trained (e.g., on averaged predictions).   
+Finally, a problem with the evaluation methodology doesn't explain the lower accuracy scores for ensemble_model. The evaluation of the ensemble model was consistent with how the model was trained (e.g., on averaged predictions).   
   
-It could be that the two submodels are underperforming or have biases. If this is the case, averaging the two submodels' predictions would not necessarily improve performance. It's also possible that averaging the submodels' predictions is exacerbating weaknesses in the two models if the models are making similar errors.   
+It could be that the two submodels are underperforming or have biases. If true, averaging the two submodels' predictions would not necessarily improve performance. It's also possible that averaging the submodels' predictions exacerbated weaknesses in the two models if the models made similar errors.   
   
-Overfitting or underfitting could also be a factor. Averaging the predictions of models that overfit the training data could result in poor generalization to unseen data. Averaging predictions could also be problematic if the submodels are underfitting the training data, because the averages could be failing to capture complex patterns.   
+Overfitting or underfitting could also be a factor. Averaging predictions from overfitting models could result in poor generalization to unseen data. Averaging predictions could also be problematic if the submodels were underfitting, failing to capture complex patterns.   
   
-It may be the case that simple averaging is not appropriate when ensembling first_model and second_model. Averaging predictions when one model submodel is significantly better than the other can dilute the effectiveness of the stronger model. Using weighted averaging instead of simple averaging might be called for in this case. A possible next step could be ensembling first_model and second_model with weighted averages.  
+It may be the case that simple averaging is not appropriate when ensembling first_model and second_model. Averaging predictions when one model submodel is significantly better than the other can dilute the effectiveness of the stronger model. In such situations, ensembling using weighted averaging instead of simple averaging could improve performance. A possible next step could be ensembling first_model and second_model with weighted averages.  
 
