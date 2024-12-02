@@ -3,31 +3,18 @@
 
 ## Executive Summary
 
-Can we train a custom convolutional neural network (CNN) model from scratch to classify CT chest scan images as indicating one of the following four conditions: Adenocarcinoma, Large cell carcinoma, Squamous cell carcinoma, or normal cells? How well does the model perform?
+Can we train a custom convolutional neural network (CNN) model from scratch to classify CT chest scan images with one of the following four conditions: Adenocarcinoma, Large cell carcinoma, Squamous cell carcinoma, or normal cells? How well does the model perform? 
   
-What happens if we add to our model a pre-trained CNN model by employing transfer learning and model ensembling? Will we see improved accuracy scores with either of these methods?
+What happens if we modify a pre-trained model for the same classification task? How well does that model perform? What happens if we add the pre-trained model to the custom CNN by employing model ensembling and transfer learning? Will we see improved accuracy scores with either of these methods?
 
-## Project Overview
+We trained and evaluated four models
+ a) first_model, a pre-trained ResNet50-based model
+ b) second_model, a custom CNN  
+ c) ensemble_model, which ensembled the predictions of model_one and model_two by averaging them  
+ d) chained_model, an example of transfer learning in which we chained first_model and second_models
 
-The data for this project was obtained at: https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images. Images reveal the presence of one of three chest carcinomas or the presence of healthy cells. The models' tasks are thus to classify each image as an one of the following four outcomes: adenocarcinoma, large cell carcinoma, squamous cell carcinoma, or healthy cells. All images were divided into training (613), testing (315), and validation (72) sets containing four types of images. 
+We compared the training loss, training accuracy, validation loss, validation accuracy, balance score, average accuracy score, and composite score values among the four models. With decent learning on the training data, mild overfitting, and the best generalization of all four, the chained_model demonstrated the best overall performance. It also achieved the highest composite score, indicating it was the most balanced and accurate of the models. Our recommendation was to use the chained_model as the preferred choice of models for the task at hand.
 
-We trained two convolutional neural network (CNN) models to classify CT chest scan images as either normal or showing one of three forms of cancer. We investigated the benefit of using a pre-trained CNN model on the same dataset by employing transfer learning and model ensembling.
-
-CNNs use convolutional and pooling layers to automatically and hierarchically learn features from images, followed by fully connected layers to classify those features into predefined categories. This process enables CNNs to effectively handle and classify complex visual data.  
-
-Pre-training a model in the context of neural networks involves training a model on a large dataset before fine-tuning it on a specific task, with the end result known as transfer learning. Pre-training is a powerful technique, especially in scenarios where data are scarce or where training a model from scratch would be impractical due to resource constraints. In this project, we used the ResNet50 CNN, trained to classifiy 14 million images in the ImageNet dataset into 1,000 different categories, as our pre-trained model. We applied this model, by itself, and in combination with our own CNN model, to the chest images for classification. 
-
-Because we were working with four distinct image lables classes (adenocarcinoma, large cell carcinoma, squamous cell carcinoma, and healthy cells), we chose the sparse categorical crossentropy loss function. We anticipated lables as integers because we used the tf.keras.preprocessing.image_dataset_from_directory' function from TensorFlow’s Keras API to load image data from the train, test, and validate directories, which automatically labels images based on directory structure.
-We defined, compiled, and trained two CNN submodels - one custom and one pre-trained - individually before ensembling and chaining them. We looked for a noticeable improvement in accuracy between the ensembled model and/or the chained model, over each of the two submodels.  
-  
- a) the pre-trained ResNet50-based model (first_model)   
- b) the custom CNN (second_model)  
- c) ensembling the output of model_one and model_two with ensemble_model  
- d) transfer learning: chaining first and second models, modified for compatabilty, into chained_model
-
-We compared training loss, training accuracy, validation loss, validation accuracy, balance score, average accuracy score, and composite score in evaluating the four models. With decent learning on the training data, mild overfitting, and the best generalization of all four models, the chained_model demonstrated the best overall performance. It also achieved the highest composite score, indicating it was the most balanced and accurate of the models. Our recommendation is to use the chained_model as the preferred choice of models.
-  
-  
 Concepts discussed:  
 Convolutional Neural Networks  
 Pre-trained models  
@@ -39,9 +26,29 @@ Model Balance Score
 Model Average Accuracy Score
 Model Composite Score
   
-The data for this project was obtained here: https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images  
+The data for this project was obtained here: https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images. Images reveal the presence of one of three chest carcinomas or the presence of healthy cells. We tasked four models with classifying each image as an one of the following four outcomes: adenocarcinoma, large cell carcinoma, squamous cell carcinoma, or healthy cells. All images were divided into training (613 images), testing (315 images), and validation (72 images) sets containing the four classes of images.   
 
 The notebook for this project is Ensemble_Chain_ResNet_custom_manual_sparse.ipynb.
+
+## Project Overview
+
+
+
+We trained two convolutional neural network (CNN) models to classify CT chest scan images as either normal or showing one of three forms of cancer. We investigated the benefit of using a pre-trained CNN model on the same dataset by employing transfer learning and model ensembling.
+
+CNNs use convolutional and pooling layers to automatically and hierarchically learn features from images, followed by fully connected layers to classify those features into predefined categories. This process enables CNNs to effectively handle and classify complex visual data.  
+
+Pre-training a model in the context of neural networks involves training a model on a large dataset before fine-tuning it on a specific task, with the end result known as transfer learning. Pre-training is a powerful technique, especially in scenarios where data are scarce or where training a model from scratch would be impractical due to resource constraints. In this project, we used the ResNet50 CNN, trained to classifiy 14 million images in the ImageNet dataset into 1,000 different categories, as our pre-trained model. We applied this model, by itself, and in combination with our own CNN model, to the chest images for classification. 
+
+Because we were working with four distinct image lables classes (adenocarcinoma, large cell carcinoma, squamous cell carcinoma, and healthy cells), we chose the sparse categorical crossentropy loss function. We anticipated lables as integers because we used the tf.keras.preprocessing.image_dataset_from_directory' function from TensorFlow’s Keras API to load image data from the train, test, and validate directories, which automatically labels images based on directory structure.
+We defined, compiled, and trained two CNN submodels - one custom and one pre-trained - individually before ensembling and chaining them. We looked for a noticeable improvement in accuracy between the ensembled model and/or the chained model, over each of the two submodels.  
+  
+
+
+
+  
+  
+
   
     
 ## Convolutional Neural Networks  
