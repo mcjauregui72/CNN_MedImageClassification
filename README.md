@@ -26,13 +26,11 @@ Model Balance Score
 Model Average Accuracy Score
 Model Composite Score
   
-The data for this project was obtained here: https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images. Images reveal the presence of one of three chest carcinomas or the presence of healthy cells. We tasked four models with classifying each image as an one of the following four outcomes: adenocarcinoma, large cell carcinoma, squamous cell carcinoma, or healthy cells. All images were divided into training (613 images), testing (315 images), and validation (72 images) sets containing the four classes of images.   
-
-The notebook for this project is Ensemble_Chain_ResNet_custom_manual_sparse.ipynb.
+The data for this project was obtained here: https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images. The notebook for this project is Ensemble_Chain_ResNet_custom_manual_sparse.ipynb.
 
 ## Project Overview
 
-
+The data for this project was obtained at https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images. Data consisted of CT scan images revealing the presence of one of three chest carcinomas or the presence of healthy cells. We tasked four models with classifying each image as an one of the following four outcomes: adenocarcinoma, large cell carcinoma, squamous cell carcinoma, or healthy cells. All images were divided into training (613 images), testing (315 images), and validation (72 images) sets containing the four classes of images.
 
 We trained two convolutional neural network (CNN) models to classify CT chest scan images as either normal or showing one of three forms of cancer. We investigated the benefit of using a pre-trained CNN model on the same dataset by employing transfer learning and model ensembling.
 
