@@ -226,7 +226,7 @@ We took the following into account when chaining model_one and model_two:
 9. Defined mod_first_model_output as mod_first_model_model.output, making mod_first_model's layers the first 'link' in the chain.  
    
 10. Defined mod_second_model_output as mod_second_model(mod_first_model_output), to pass the first 'link's' output to the second 'link' in the chain, mod_second_model.      
-11. Defined the output of the second link in the chain as mod_second_model_output. This allowed us to define the composite model, chained_model, as Model(inputs=mod_resnet_model.input, outputs=mod_custom_cnn_output).  
+11. Defined the output of the second link in the chain as mod_second_model_output. This allowed us to define the composite model, chained_model, as Model(inputs=mod_first_model.input, outputs=mod_second_model_output).  
     
 12. Specified optimizer = Adam(), defined a filepath to save chained_model's best model, and defined equivalent EarlyStopping and ModelCheckpoint callbacks as used previously.  
     
@@ -294,7 +294,7 @@ c) estimating ensemble loss and ensemble accuracy by requesting ensemble_model.e
   
   
 ## Model Performance Summaries  
-
+  
 first_model  
   * Training performance: With high training accuracy and relatively low training loss, first_model learned well on the training dataset. 
   * Validation performance: Moderate accuracy but higher loss suggested overfitting. The first_model performed better on the training data than on the unseen data.  
@@ -322,20 +322,20 @@ chained_model
   * Testing performance: Because accuracy was higher, and loss lower, than with first_model and second_model, chained_model exhibited better generalization to unseen data than the submodels.  
   * Acheived the highest composite score among the four models, demonstrating good accuracy and consistency.  
   * Conclusion: chained_model achieved the best generalization, balancing, training, validation, and testing performance among all four models.   
-
+  
 With decent learning on the training data, mild overfitting, and the best generalization of all four models, the chained_model demonstrated the best overall performance. It also achieved the highest composite score, indicating it was the most balanced and accurate of the models. Our recommendation is to use the chained_model as the preferred choice of models.  
   
   
 ## Potential Next Steps  
   
 The accuracy results for the ensemble_model were especially low. It is unusual for an ensemble model that combines its submodels' output to have lower accuracy than its individual submodels. Such results can indicate an issue with prediction averaging, if the models' outputs are raw logits or probabilities. Because the two classification models are generating averageable probabilities, however, averaging errors are not at play.  
-
+  
 Likewise, we can rule out the possibility that the model was trained using pseudo-lables rather than true labels, since we explicitly specified the relevant true lables as the validation_data. Pseudo-labeling would have occured if we trained the ensemble model on the submodel predictions as labels, instead of using the true labels.  
-
+  
 Finally, a problem with the evaluation methodology doesn't explain the lower accuracy scores for the ensemble_model. The evaluation of the ensemble model wass consistent with how the model was trained (e.g., on averaged predictions).   
-
+  
 It could be that the two submodels are underperforming or have biases. If this is the case, averaging the two submodels' predictions would not necessarily improve performance. It's also possible that averaging the submodels' predictions is exacerbating weaknesses in the two models if the models are making similar errors.   
-
+  
 Overfitting or underfitting could also be a factor. Averaging the predictions of models that overfit the training data could result in poor generalization to unseen data. Averaging predictions could also be problematic if the submodels are underfitting the training data, because the averages could be failing to capture complex patterns.   
   
 It may be the case that simple averaging is not appropriate when ensembling first_model and second_model. Averaging predictions when one model submodel is significantly better than the other can dilute the effectiveness of the stronger model. Using weighted averaging instead of simple averaging might be called for in this case. A possible next step could be ensembling first_model and second_model with weighted averages.  
