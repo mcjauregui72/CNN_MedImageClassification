@@ -7,12 +7,12 @@ Can we train a custom convolutional neural network (CNN) model from scratch to c
   
 What happens if we modify a pre-trained model for the same classification task? How well does that model perform? What happens if we add the pre-trained model to the custom CNN by employing model ensembling and transfer learning? Will we see improved accuracy scores with either of these methods?
 
-We trained and evaluated four models
- a) first_model, a pre-trained ResNet50-based model
+We trained and evaluated four models  
+ a) first_model, a pre-trained ResNet50-based model  
  b) second_model, a custom CNN  
  c) ensemble_model, which ensembled the predictions of model_one and model_two by averaging them  
- d) chained_model, an example of transfer learning in which we chained first_model and second_models
-
+ d) chained_model, an example of transfer learning in which we chained first_model and second_models  
+  
 We compared the training loss, training accuracy, validation loss, validation accuracy, balance score, average accuracy score, and composite score values among the four models. With decent learning on the training data, mild overfitting, and the best generalization of all four, the chained_model demonstrated the best overall performance. It also achieved the highest composite score, indicating it was the most balanced and accurate of the models. Our recommendation was to use the chained_model as the preferred choice of models for the task at hand.
 
 Concepts discussed:  
